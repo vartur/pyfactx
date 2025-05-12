@@ -3,16 +3,16 @@ from xml.etree.ElementTree import Element, SubElement
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
-from .namespaces import RAM
+from .namespaces import RAM, UDT
 
 
-class DebtorFinancialAccount(BaseModel):
-    iban_id: str = Field(...)
+class Indicator(BaseModel):
+    indicator: bool = Field(...)
 
     def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        # IBANID
-        SubElement(root, f"{RAM}:IBANID").text = self.iban_id
+        # Indicator
+        SubElement(root, f"{UDT}:Indicator").text = "true" if self.indicator else "false"
 
         return root

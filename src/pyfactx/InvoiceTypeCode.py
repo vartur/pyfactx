@@ -26,6 +26,3 @@ class InvoiceTypeCode(Enum):
     PARTIAL_CONSTRUCTION_INVOICE = 875
     PARTIAL_FINAL_CONSTRUCTION_INVOICE = 876
     FINAL_CONSTRUCTION_INVOICE = 877
-
-    def to_xml(self):
-        return f"<ram:TypeCode>{self.value}</ram:TypeCode>"

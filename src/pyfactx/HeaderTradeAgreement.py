@@ -1,9 +1,12 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
+from .ReferencedDocument import ReferencedDocument
 from .TradeParty import TradeParty
+from .namespaces import RAM
 
 
 class HeaderTradeAgreement(BaseModel):
@@ -11,32 +14,35 @@ class HeaderTradeAgreement(BaseModel):
     seller_trade_party: TradeParty = Field(...)
     buyer_trade_party: TradeParty = Field(...)
     seller_tax_representative_trade_party: Optional[TradeParty] = Field(default=None)
-    buyer_order_referenced_document: Optional[str] = Field(default=None)
-    contract_referenced_document: Optional[str] = Field(default=None)
+    buyer_order_referenced_document: Optional[ReferencedDocument] = Field(default=None)
+    contract_referenced_document: Optional[ReferencedDocument] = Field(default=None)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
-        xml_string = "<ram:ApplicableHeaderTradeAgreement>"
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
-        if self.buyer_reference is not None:
-            xml_string += f"<ram:BuyerReference>{self.buyer_reference}</ram:BuyerReference>"
+        # BuyerReference
+        if self.buyer_reference:
+            SubElement(root, f"{RAM}:BuyerReference").text = self.buyer_reference
 
-        xml_string += f"<ram:SellerTradeParty>{self.seller_trade_party.to_xml(profile)}</ram:SellerTradeParty>"
-        xml_string += f"<ram:BuyerTradeParty>{self.buyer_trade_party.to_xml(profile)}</ram:BuyerTradeParty>"
+        # SellerTradeParty
+        root.append(self.seller_trade_party.to_xml("SellerTradeParty", profile))
 
-        if profile != InvoiceProfile.MINIMUM:
-            if self.seller_tax_representative_trade_party is not None:
-                xml_string += f"<ram:SellerTaxRepresentativeTradeParty>{self.seller_tax_representative_trade_party.to_xml(profile)}</ram:SellerTaxRepresentativeTradeParty>"
-
-        if self.buyer_order_referenced_document is not None:
-            xml_string += f'''<ram:BuyerOrderReferencedDocument>
-                                    <ram:IssuerAssignedID>{self.buyer_order_referenced_document}</ram:IssuerAssignedID>
-                                </ram:BuyerOrderReferencedDocument>'''
+        # BuyerTradeParty
+        root.append(self.buyer_trade_party.to_xml("BuyerTradeParty", profile))
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.contract_referenced_document is not None:
-                xml_string += f'''<ram:ContractReferencedDocument>
-                                                    <ram:IssuerAssignedID>{self.contract_referenced_document}</ram:IssuerAssignedID>
-                                                </ram:ContractReferencedDocument>'''
+            # SellerTaxRepresentativeTradeParty
+            if self.seller_tax_representative_trade_party:
+                root.append(
+                    self.seller_tax_representative_trade_party.to_xml("SellerTaxRepresentativeTradeParty", profile))
 
-        xml_string += "</ram:ApplicableHeaderTradeAgreement>"
-        return xml_string
+        # BuyerOrderReferencedDocument
+        if self.buyer_order_referenced_document:
+            root.append(self.buyer_order_referenced_document.to_xml("BuyerOrderReferencedDocument", profile))
+
+        if profile != InvoiceProfile.MINIMUM:
+            # ContractReferencedDocument
+            if self.contract_referenced_document:
+                root.append(self.contract_referenced_document.to_xml("ContractReferencedDocument", profile))
+
+        return root

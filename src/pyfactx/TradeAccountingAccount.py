@@ -6,13 +6,13 @@ from .InvoiceProfile import InvoiceProfile
 from .namespaces import RAM
 
 
-class DebtorFinancialAccount(BaseModel):
-    iban_id: str = Field(...)
+class TradeAccountingAccount(BaseModel):
+    id: str = Field(...)
 
     def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        # IBANID
-        SubElement(root, f"{RAM}:IBANID").text = self.iban_id
+        # ID
+        SubElement(root, f"{RAM}:ID").text = self.id
 
         return root

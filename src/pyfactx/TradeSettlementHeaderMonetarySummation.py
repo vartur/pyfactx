@@ -1,8 +1,10 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
+from .namespaces import RAM
 
 
 class TradeSettlementHeaderMonetarySummation(BaseModel):
@@ -15,31 +17,40 @@ class TradeSettlementHeaderMonetarySummation(BaseModel):
     total_prepaid_amount: Optional[float] = Field(default=None)  # From BASICWL
     due_payable_amount: float = Field(...)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
-        xml_string = "<ram:SpecifiedTradeSettlementHeaderMonetarySummation>"
+    def to_xml(self, element_name: str, tax_currency_code: str = "EUR",
+               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.line_total_amount is not None:
-                xml_string += f"<ram:LineTotalAmount>{self.line_total_amount}</ram:LineTotalAmount>"
+            # LineTotalAmount
+            if self.line_total_amount:
+                SubElement(root, f"{RAM}:LineTotalAmount").text = str(self.line_total_amount)
 
-            if self.charge_total_amount is not None:
-                xml_string += f"<ram:ChargeTotalAmount>{self.charge_total_amount}</ram:ChargeTotalAmount>"
+            # ChargeTotalAmount
+            if self.charge_total_amount:
+                SubElement(root, f"{RAM}:ChargeTotalAmount").text = str(self.charge_total_amount)
 
-            if self.allowance_total_amount is not None:
-                xml_string += f"<ram:AllowanceTotalAmount>{self.allowance_total_amount}</ram:AllowanceTotalAmount>"
+            # AllowanceTotalAmount
+            if self.allowance_total_amount:
+                SubElement(root, f"{RAM}:AllowanceTotalAmount").text = str(self.allowance_total_amount)
 
-        xml_string += f"<ram:TaxBasisTotalAmount>{self.tax_basis_total_amount}</ram:TaxBasisTotalAmount>"
+        # TaxBasisTotalAmount
+        SubElement(root, f"{RAM}:TaxBasisTotalAmount").text = str(self.tax_basis_total_amount)
 
-        if self.tax_total_amount is not None:
-            xml_string += f"<ram:TaxTotalAmount currencyID=\"EUR\">{self.tax_total_amount}</ram:TaxTotalAmount>"
+        # TaxTotalAmount
+        if self.tax_total_amount:
+            SubElement(root, f"{RAM}:TaxTotalAmount", attrib={"currencyID": tax_currency_code}).text = str(
+                self.tax_total_amount)
 
-        xml_string += f"<ram:GrandTotalAmount>{self.grand_total_amount}</ram:GrandTotalAmount>"
+        # GrandTotalAmount
+        SubElement(root, f"{RAM}:GrandTotalAmount").text = str(self.grand_total_amount)
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.total_prepaid_amount is not None:
-                xml_string += f"<ram:TotalPrepaidAmount>{self.total_prepaid_amount}</ram:TotalPrepaidAmount>"
+            # TotalPrepaidAmount
+            if self.total_prepaid_amount:
+                SubElement(root, f"{RAM}:TotalPrepaidAmount").text = str(self.total_prepaid_amount)
 
-        xml_string += f'''<ram:DuePayableAmount>{self.due_payable_amount}</ram:DuePayableAmount>
-                            </ram:SpecifiedTradeSettlementHeaderMonetarySummation>'''
+        # DuePayableAmount
+        SubElement(root, f"{RAM}:DuePayableAmount").text = str(self.due_payable_amount)
 
-        return xml_string
+        return root

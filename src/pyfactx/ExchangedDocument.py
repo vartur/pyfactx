@@ -1,29 +1,38 @@
+from datetime import datetime
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
 from .InvoiceTypeCode import InvoiceTypeCode
 from .Note import Note
+from .namespaces import RAM, RSM, UDT
+
 
 class ExchangedDocument(BaseModel):
     id: str = Field(...)
     type_code: InvoiceTypeCode = Field(default=InvoiceTypeCode.COMMERCIAL_INVOICE)
-    issue_date_time: str = Field(...)
+    issue_date_time: datetime = Field(...)
     included_notes: Optional[list[Note]] = Field(default=None)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
-        xml_string = "<rsm:ExchangedDocument>"
-        xml_string += f"<ram:ID>{self.id}</ram:ID>"
-        xml_string += self.type_code.to_xml()
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RSM}:{element_name}")
 
-        xml_string += f'''<ram:IssueDateTime>
-                                <udt:DateTimeString format="102">{self.issue_date_time}</udt:DateTimeString>
-                            </ram:IssueDateTime>'''
+        # ID
+        SubElement(root, f"{RAM}:ID").text = self.id
 
-        if profile != InvoiceProfile.MINIMUM:
+        # TypeCode
+        SubElement(root, f"{RAM}:TypeCode").text = self.type_code.value
+
+        # IssueDateTime
+        issue_dt_element = SubElement(root, f"{RAM}:IssueDateTime")
+        SubElement(issue_dt_element, f"{UDT}:DateTimeString",
+                   attrib={"format": "102"}).text = self.issue_date_time.strftime("%Y%m%d")
+
+        # IncludedNotes
+        if profile != InvoiceProfile.MINIMUM and self.included_notes:
             for note in self.included_notes:
-                xml_string += note.to_xml()
+                root.append(note.to_xml("IncludedNote", profile))
 
-        xml_string += "</rsm:ExchangedDocument>"
-        return xml_string
+        return root

@@ -1,38 +1,35 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
+from .ReferencedDocument import ReferencedDocument
+from .SupplyChainEvent import SupplyChainEvent
 from .TradeParty import TradeParty
+from .namespaces import RAM
 
 
 class HeaderTradeDelivery(BaseModel):
     ship_to_trade_party: Optional[TradeParty] = Field(default=None)
-    actual_delivery_supply_chain_event: Optional[str] = Field(default=None)  # delivery date YYYYMMDD
-    despatch_advice_referenced_document: Optional[str] = Field(default=None)
+    actual_delivery_supply_chain_event: Optional[SupplyChainEvent] = Field(default=None)
+    despatch_advice_referenced_document: Optional[ReferencedDocument] = Field(default=None)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
-        if profile == InvoiceProfile.MINIMUM:
-            return "<ram:ApplicableHeaderTradeDelivery/>"
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
-        xml_string = "<ram:ApplicableHeaderTradeDelivery>"
-        if self.ship_to_trade_party is not None:
-            xml_string += f'''<ram:ShipToTradeParty>
-                                {self.ship_to_trade_party.to_xml(profile)}
-                                </ram:ShipToTradeParty>'''
+        if profile != InvoiceProfile.MINIMUM:
+            # ShipToTradeParty
+            if self.ship_to_trade_party:
+                root.append(self.ship_to_trade_party.to_xml("ShipToTradeParty", profile))
 
-        if self.actual_delivery_supply_chain_event:
-            xml_string += f'''<ram:ActualDeliverySupplyChainEvent>
-                                    <ram:OccurrenceDateTime>
-                                        <udt:DateTimeString format="102">{self.actual_delivery_supply_chain_event}</udt:DateTimeString>
-                                    </ram:OccurrenceDateTime>
-                                </ram:ActualDeliverySupplyChainEvent>'''
+            # ActualDeliverySupplyChainEvent
+            if self.actual_delivery_supply_chain_event:
+                root.append(self.actual_delivery_supply_chain_event.to_xml("ActualDeliverySupplyChainEvent", profile))
 
-        if self.despatch_advice_referenced_document is not None:
-            xml_string += f'''<ram:DespatchAdviceReferencedDocument>
-                                    <ram:IssuerAssignedID>{self.despatch_advice_referenced_document}</ram:IssuerAssignedID>
-                                </ram:DespatchAdviceReferencedDocument>'''
+            # DespatchAdviceReferencedDocument
+            if self.despatch_advice_referenced_document:
+                root.append(
+                    self.despatch_advice_referenced_document.to_xml("DespatchAdviceReferencedDocument", profile))
 
-        xml_string += "</ram:ApplicableHeaderTradeDelivery>"
-
-        return xml_string
+        return root

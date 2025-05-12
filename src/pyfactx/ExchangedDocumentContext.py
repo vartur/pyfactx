@@ -1,25 +1,28 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
+from .namespaces import RAM, RSM
 
 
 class ExchangedDocumentContext(BaseModel):
     business_process_specified_document_context_parameter: Optional[str] = Field(default=None)
     guideline_specified_document_context_parameter: InvoiceProfile = Field(...)
 
-    def to_xml(self):
-        xml_string = "<rsm:ExchangedDocumentContext>"
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RSM}:{element_name}")
 
-        if self.business_process_specified_document_context_parameter is not None:
-            xml_string += f'''<ram:BusinessProcessSpecifiedDocumentContextParameter>
-                                    <ram:ID>{self.business_process_specified_document_context_parameter}</ram:ID>
-                                </ram:BusinessProcessSpecifiedDocumentContextParameter>'''
+        # BusinessProcessSpecifiedDocumentContextParameter
+        if self.business_process_specified_document_context_parameter:
+            business_spec_param_elem = SubElement(root, f"{RAM}:BusinessProcessSpecifiedDocumentContextParameter")
+            SubElement(business_spec_param_elem,
+                       f"{RAM}:ID").text = self.business_process_specified_document_context_parameter
 
-        xml_string += f'''<ram:GuidelineSpecifiedDocumentContextParameter>
-                                {self.guideline_specified_document_context_parameter.to_xml()}
-                            </ram:GuidelineSpecifiedDocumentContextParameter>'''
+        # GuidelineSpecifiedDocumentContextParameter
+        guideline_spec_param_elem = SubElement(root, f"{RAM}:GuidelineSpecifiedDocumentContextParameter")
+        SubElement(guideline_spec_param_elem,
+                   f"{RAM}:ID").text = self.guideline_specified_document_context_parameter.value()
 
-        xml_string += "</rsm:ExchangedDocumentContext>"
-        return xml_string
+        return root

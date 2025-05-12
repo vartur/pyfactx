@@ -1,8 +1,10 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
+from .namespaces import RAM
 
 
 class TradeAddress(BaseModel):
@@ -14,31 +16,36 @@ class TradeAddress(BaseModel):
     country: str = Field(...)
     country_subdivision: Optional[str] = Field(default=None)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
-        xml_string = "<ram:PostalTradeAddress>"
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.postcode is not None:
-                xml_string += f"<ram:PostcodeCode>{self.postcode}</ram:PostcodeCode>"
+            # PostcodeCode
+            if self.postcode:
+                SubElement(root, f"{RAM}:PostcodeCode").text = self.postcode
 
-            if self.line_one is not None:
-                xml_string += f"<ram:LineOne>{self.line_one}</ram:LineOne>"
+            # LineOne
+            if self.line_one:
+                SubElement(root, f"{RAM}:LineOne").text = self.line_one
 
-            if self.line_two is not None:
-                xml_string += f"<ram:LineTwo>{self.line_two}</ram:LineTwo>"
+            # LineTwo
+            if self.line_two:
+                SubElement(root, f"{RAM}:LineTwo").text = self.line_two
 
-            if self.line_three is not None:
-                xml_string += f"<ram:LineThree>{self.line_three}</ram:LineThree>"
+            # LineThree
+            if self.line_three:
+                SubElement(root, f"{RAM}:LineThree").text = self.line_three
 
-            if self.city is not None:
-                xml_string += f"<ram:CityName>{self.city}</ram:CityName>"
+            # CityName
+            if self.city:
+                SubElement(root, f"{RAM}:CityName").text = self.city
 
-        xml_string += f"<ram:CountryID>{self.country}</ram:CountryID>"
+        # CountryID
+        SubElement(root, f"{RAM}:CountryID").text = self.country
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.country_subdivision is not None:
-                xml_string += f"<ram:CountrySubDivisionName>{self.country_subdivision}</ram:CountrySubDivisionName>"
+            # CountrySubdivisionName
+            if self.country_subdivision:
+                SubElement(root, f"{RAM}:CountrySubDivisionName").text = self.country_subdivision
 
-        xml_string += "</ram:PostalTradeAddress>"
-
-        return xml_string
+        return root

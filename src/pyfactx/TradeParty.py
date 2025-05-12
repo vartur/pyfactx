@@ -1,10 +1,12 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
 
 from .InvoiceProfile import InvoiceProfile
 from .TradeAddress import TradeAddress
 from .LegalOrganization import LegalOrganization
+from .namespaces import RAM
 
 
 class TradeParty(BaseModel):
@@ -17,37 +19,41 @@ class TradeParty(BaseModel):
     uri_universal_communication: Optional[str] = Field(default=None)  # e-mail
     specified_tax_registration: Optional[str] = Field(default=None)
 
-    def to_xml(self, profile: InvoiceProfile.MINIMUM):
-        xml_string = ""
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.ids is not None:
+            # IDs
+            if self.ids:
                 for identifier in self.ids:
-                    xml_string += f"<ram:ID>{identifier}</ram:ID>"
+                    SubElement(root, f"{RAM}:ID").text = identifier
 
-            if self.global_ids is not None:
+            # GlobalIDs
+            if self.global_ids:
                 for scheme_id, global_id in self.global_ids:
-                    xml_string += f"<ram:GlobalID schemeID=\"{scheme_id}\">{global_id}</ram:GlobalID>"
+                    SubElement(root, f"{RAM}:GlobalID", attrib={"schemeID": scheme_id}).text = global_id
 
-        xml_string += f"<ram:Name>{self.name}</ram:Name>"
+        # Name
+        SubElement(root, f"{RAM}:Name").text = self.name
 
-        if self.specified_legal_organisation is not None:
-            xml_string += f'''<ram:SpecifiedLegalOrganization>
-                                    {self.specified_legal_organisation.to_xml(profile)}
-                                </ram:SpecifiedLegalOrganization>'''
+        # SpecifiedLegalOrganization
+        if self.specified_legal_organisation:
+            root.append(self.specified_legal_organisation.to_xml("SpecifiedLegalOrganization", profile))
 
-        if self.trade_address is not None:
-            xml_string += self.trade_address.to_xml(profile)
+        # PostalTradeAddress
+        if self.trade_address:
+            root.append(self.trade_address.to_xml("PostalTradeAddress", profile))
 
         if profile != InvoiceProfile.MINIMUM:
-            if self.uri_universal_communication is not None:
-                xml_string += f'''<ram:URIUniversalCommunication>
-                                        <ram:URIID schemeID="EM">{self.uri_universal_communication}</ram:URIID>
-                                    </ram:URIUniversalCommunication>'''
+            # URIUniversalCommunication
+            if self.uri_universal_communication:
+                uri_univ_element = SubElement(root, f"{RAM}:URIUniversalCommunication")
+                SubElement(uri_univ_element, f"{RAM}:URIID",
+                           attrib={"schemeID": "EM"}).text = self.uri_universal_communication
 
-        if self.specified_tax_registration is not None:
-            xml_string += f'''<ram:SpecifiedTaxRegistration>
-                                    <ram:ID schemeID="VA">{self.specified_tax_registration}</ram:ID>
-                                </ram:SpecifiedTaxRegistration>'''
+        # SpecifiedTaxRegistration
+        if self.specified_tax_registration:
+            spec_tax_elem = SubElement(root, f"{RAM}:SpecifiedTaxRegistration")
+            SubElement(spec_tax_elem, f"{RAM}:ID", attrib={"schemeID": "VA"}).text = self.specified_tax_registration
 
-        return xml_string
+        return root

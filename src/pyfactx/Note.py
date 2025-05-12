@@ -1,18 +1,24 @@
 from typing import Optional
+from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import BaseModel, Field
+
+from .InvoiceProfile import InvoiceProfile
+from .namespaces import RAM
 
 
 class Note(BaseModel):
     content: str = Field(...)
     subject_code: Optional[str] = Field(default=None)  # https://service.unece.org/trade/untdid/d00a/tred/tred4451.htm
 
-    def to_xml(self):
-        xml_string = "<ram:IncludedNote>"
-        xml_string += f"<ram:Content>{self.content}</ram:Content>"
+    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+        root = Element(f"{RAM}:{element_name}")
 
-        if self.subject_code is not None:
-            xml_string += f"<ram:SubjectCode>{self.subject_code}</ram:SubjectCode>"
+        # Content
+        SubElement(root, f"{RAM}:Content").text = self.content
 
-        xml_string += "</ram:IncludedNote>"
-        return xml_string
+        # SubjectCode
+        if self.subject_code:
+            SubElement(root, f"{RAM}:SubjectCode").text = self.subject_code
+
+        return root
