@@ -1,20 +1,23 @@
 from typing import Optional
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from typing_extensions import override
 
 from .CreditorFinancialAccount import CreditorFinancialAccount
 from .DebtorFinancialAccount import DebtorFinancialAccount
 from .InvoiceProfile import InvoiceProfile
 from .PaymentMeansCode import PaymentMeansCode
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class TradeSettlementPaymentMeans(BaseModel):
+class TradeSettlementPaymentMeans(XMLBaseModel):
     payment_means_code: PaymentMeansCode = Field(...)
     payer_party_debtor_financial_account: Optional[DebtorFinancialAccount] = Field(default=None)
     payee_party_creditor_financial_account: Optional[CreditorFinancialAccount] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 

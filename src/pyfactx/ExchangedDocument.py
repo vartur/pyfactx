@@ -1,21 +1,23 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .InvoiceTypeCode import InvoiceTypeCode
 from .Note import Note
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM, RSM, UDT
 
 
-class ExchangedDocument(BaseModel):
+class ExchangedDocument(XMLBaseModel):
     id: str = Field(...)
     type_code: InvoiceTypeCode = Field(default=InvoiceTypeCode.COMMERCIAL_INVOICE)
     issue_date_time: datetime = Field(...)
     included_notes: Optional[list[Note]] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 

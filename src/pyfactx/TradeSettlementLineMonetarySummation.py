@@ -1,3 +1,4 @@
+from typing import Optional
 from xml.etree.ElementTree import Element, SubElement
 
 from pydantic import Field
@@ -8,14 +9,16 @@ from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class DebtorFinancialAccount(XMLBaseModel):
-    iban_id: str = Field(...)
+class TradeSettlementLineMonetarySummation(XMLBaseModel):
+    line_total_amount: float = Field(...)
+    currency_code: Optional[str] = Field(default=None)
 
     @override
     def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        # IBANID
-        SubElement(root, f"{RAM}:IBANID").text = self.iban_id
+        # LineTotalAmount
+        attrib = {"currencyID": self.currency_code} if self.currency_code else {}
+        SubElement(root, f"{RAM}:LineTotalAmount", attrib=attrib).text = str(self.line_total_amount)
 
         return root

@@ -1,23 +1,26 @@
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class TradeSettlementHeaderMonetarySummation(BaseModel):
+class TradeSettlementHeaderMonetarySummation(XMLBaseModel):
     line_total_amount: Optional[float] = Field(default=None)  # From BASICWL
     charge_total_amount: Optional[float] = Field(default=None)  # From BASICWL
     allowance_total_amount: Optional[float] = Field(default=None)  # From BASICWL
     tax_basis_total_amount: float = Field(...)
     tax_total_amount: Optional[float] = Field(default=None)
+    tax_currency_code: Optional[str] = Field(default="EUR")
     grand_total_amount: float = Field(...)
     total_prepaid_amount: Optional[float] = Field(default=None)  # From BASICWL
     due_payable_amount: float = Field(...)
 
-    def to_xml(self, element_name: str,  profile: InvoiceProfile, tax_currency_code: str = "EUR") -> Element:
+    @override
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:
@@ -38,8 +41,8 @@ class TradeSettlementHeaderMonetarySummation(BaseModel):
 
         # TaxTotalAmount
         if self.tax_total_amount:
-            SubElement(root, f"{RAM}:TaxTotalAmount", attrib={"currencyID": tax_currency_code}).text = str(
-                self.tax_total_amount)
+            attrib = {"currencyID": self.tax_currency_code} if self.tax_currency_code else {}
+            SubElement(root, f"{RAM}:TaxTotalAmount", attrib=attrib).text = str(self.tax_total_amount)
 
         # GrandTotalAmount
         SubElement(root, f"{RAM}:GrandTotalAmount").text = str(self.grand_total_amount)

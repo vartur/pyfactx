@@ -1,16 +1,18 @@
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class LegalOrganization(BaseModel):
+class LegalOrganization(XMLBaseModel):
     id: Optional[str] = Field(default=None)
     trading_business_name: Optional[str] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 

@@ -1,25 +1,29 @@
 from xml.etree.ElementTree import Element, register_namespace
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from typing_extensions import override
 
 from .ExchangedDocument import ExchangedDocument
 from .ExchangedDocumentContext import ExchangedDocumentContext
 from .InvoiceProfile import InvoiceProfile
 from .SupplyChainTradeTransaction import SupplyChainTradeTransaction
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import NAMESPACES, RSM
 
 
-class FacturXMinimum(BaseModel):
+class FacturXMinimum(XMLBaseModel):
     exchanged_document_context: ExchangedDocumentContext = Field(...)
     exchanged_document: ExchangedDocument = Field(...)
     supply_chain_transaction: SupplyChainTradeTransaction = Field(...)
 
-    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    @override
+    def to_xml(self, element_name: str = "CrossIndustryInvoice",
+               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
         for prefix, uri in NAMESPACES.items():
             register_namespace(prefix, uri)
 
         # CrossIndustryInvoice
-        root = Element(f"{RSM}:CrossIndustryInvoice", {
+        root = Element(f"{RSM}:{element_name}", {
             f"xmlns:{k}": v for k, v in NAMESPACES.items()
         })
 

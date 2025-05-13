@@ -1,20 +1,22 @@
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from .namespaces import RAM
 from .InvoiceProfile import InvoiceProfile
 from .TradeAllowanceCharge import TradeAllowanceCharge
 from .UnitCode import UnitCode
-from namespaces import RAM
+from .XMLBaseModel import XMLBaseModel
 
 
-class TradePrice(BaseModel):
+class TradePrice(XMLBaseModel):
     charge_amount: float = Field(...)
     quantity: Optional[float] = Field(default=None)
     unit: Optional[UnitCode] = Field(default=None)
     applied_trade_allowance_charge: Optional[TradeAllowanceCharge] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 

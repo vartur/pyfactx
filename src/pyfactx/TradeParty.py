@@ -1,15 +1,16 @@
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
-from .TradeAddress import TradeAddress
 from .LegalOrganization import LegalOrganization
+from .TradeAddress import TradeAddress
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class TradeParty(BaseModel):
+class TradeParty(XMLBaseModel):
     ids: Optional[list[str]] = Field(default=None)
     global_ids: Optional[list[tuple[str, str]]] = Field(
         default=None)  # <ram:GlobalID schemeID="0088">587451236587</ram:GlobalID>
@@ -19,6 +20,7 @@ class TradeParty(BaseModel):
     uri_universal_communication: Optional[str] = Field(default=None)  # e-mail
     specified_tax_registration: Optional[str] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 

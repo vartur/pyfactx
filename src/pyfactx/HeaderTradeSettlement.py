@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .ReferencedDocument import ReferencedDocument
@@ -13,10 +13,11 @@ from .TradePaymentTerms import TradePaymentTerms
 from .TradeSettlementHeaderMonetarySummation import TradeSettlementHeaderMonetarySummation
 from .TradeSettlementPaymentMeans import TradeSettlementPaymentMeans
 from .TradeTax import TradeTax
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class HeaderTradeSettlement(BaseModel):
+class HeaderTradeSettlement(XMLBaseModel):
     creditor_reference_id: Optional[str] = Field(default=None)
     payment_reference: Optional[str] = Field(default=None)
     tax_currency_code: Optional[str] = Field(default=None)
@@ -31,6 +32,7 @@ class HeaderTradeSettlement(BaseModel):
     invoice_referenced_documents: Optional[list[ReferencedDocument]] = Field(default=None)
     receivable_specified_trade_accounting_account: Optional[TradeAccountingAccount] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
@@ -80,8 +82,7 @@ class HeaderTradeSettlement(BaseModel):
 
         # SpecifiedTradeSettlementHeaderMonetarySummation
         root.append(self.specified_trade_settlement_header_monetary_summation.to_xml(
-            "SpecifiedTradeSettlementHeaderMonetarySummation", profile,
-            tax_currency_code=(self.tax_currency_code if self.tax_currency_code else self.invoice_currency_code)))
+            "SpecifiedTradeSettlementHeaderMonetarySummation", profile))
 
         if profile != InvoiceProfile.MINIMUM:
             # InvoiceReferencedDocument

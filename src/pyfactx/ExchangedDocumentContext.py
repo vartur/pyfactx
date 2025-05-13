@@ -1,16 +1,19 @@
 from typing import Optional
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from typing_extensions import override
 
 from .InvoiceProfile import InvoiceProfile
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM, RSM
 
 
-class ExchangedDocumentContext(BaseModel):
+class ExchangedDocumentContext(XMLBaseModel):
     business_process_specified_document_context_parameter: Optional[str] = Field(default=None)
     guideline_specified_document_context_parameter: InvoiceProfile = Field(...)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 

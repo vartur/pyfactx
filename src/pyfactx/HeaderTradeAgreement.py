@@ -1,15 +1,17 @@
 from typing import Optional
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from typing_extensions import override
 
 from .InvoiceProfile import InvoiceProfile
 from .ReferencedDocument import ReferencedDocument
 from .TradeParty import TradeParty
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
 
-class HeaderTradeAgreement(BaseModel):
+class HeaderTradeAgreement(XMLBaseModel):
     buyer_reference: Optional[str] = Field(default=None)
     seller_trade_party: TradeParty = Field(...)
     buyer_trade_party: TradeParty = Field(...)
@@ -17,6 +19,7 @@ class HeaderTradeAgreement(BaseModel):
     buyer_order_referenced_document: Optional[ReferencedDocument] = Field(default=None)
     contract_referenced_document: Optional[ReferencedDocument] = Field(default=None)
 
+    @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 

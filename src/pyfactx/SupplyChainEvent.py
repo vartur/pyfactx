@@ -1,15 +1,18 @@
 from datetime import datetime
 from xml.etree.ElementTree import Element, SubElement
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from typing_extensions import override
 
 from .InvoiceProfile import InvoiceProfile
+from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM, UDT
 
 
-class SupplyChainEvent(BaseModel):
+class SupplyChainEvent(XMLBaseModel):
     occurrence_date: datetime = Field(...)
 
+    @override
     def to_xml(self, element_name: str, _profile: InvoiceProfile):
         root = Element(f"{RAM}:{element_name}")
 
