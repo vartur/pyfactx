@@ -1,7 +1,6 @@
 from typing import Optional
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, SubElement
 
-from lxml.etree import SubElement
 from pydantic import BaseModel, Field
 
 from .AllowanceChargeReasonCode import AllowanceChargeReasonCode
@@ -20,7 +19,7 @@ class TradeAllowanceCharge(BaseModel):
     reason: Optional[str] = Field(default=None)
     category_trade_tax: TradeTax = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # ChargeIndicator
@@ -28,18 +27,18 @@ class TradeAllowanceCharge(BaseModel):
 
         # CalculationPercent
         if self.calculation_percent:
-            SubElement(root, f"{RAM}:CalculationPercent").text = self.calculation_percent
+            SubElement(root, f"{RAM}:CalculationPercent").text = str(self.calculation_percent)
 
         # BasisAmount
         if self.basis_amount:
-            SubElement(root, f"{RAM}:BasisAmount").text = self.basis_amount
+            SubElement(root, f"{RAM}:BasisAmount").text = str(self.basis_amount)
 
         # ActualAmount
-        SubElement(root, f"{RAM}:ActualAmount").text = self.actual_amount
+        SubElement(root, f"{RAM}:ActualAmount").text = str(self.actual_amount)
 
         # ReasonCode
         if self.reason_code:
-            SubElement(root, f"{RAM}:ReasonCode").text = self.reason_code
+            SubElement(root, f"{RAM}:ReasonCode").text = self.reason_code.value
 
         # Reason
         if self.reason:

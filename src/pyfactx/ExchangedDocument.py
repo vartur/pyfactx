@@ -16,7 +16,7 @@ class ExchangedDocument(BaseModel):
     issue_date_time: datetime = Field(...)
     included_notes: Optional[list[Note]] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 
         # ID

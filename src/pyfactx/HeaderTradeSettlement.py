@@ -31,7 +31,7 @@ class HeaderTradeSettlement(BaseModel):
     invoice_referenced_documents: Optional[list[ReferencedDocument]] = Field(default=None)
     receivable_specified_trade_accounting_account: Optional[TradeAccountingAccount] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:
@@ -76,13 +76,12 @@ class HeaderTradeSettlement(BaseModel):
 
             # SpecifiedTradePaymentTerms
             if self.specified_trade_payment_terms:
-                root.append(self.specified_trade_payment_terms.to_xml("SpecifiedTradePaymentTerms"))
+                root.append(self.specified_trade_payment_terms.to_xml("SpecifiedTradePaymentTerms", profile))
 
         # SpecifiedTradeSettlementHeaderMonetarySummation
         root.append(self.specified_trade_settlement_header_monetary_summation.to_xml(
-            "SpecifiedTradeSettlementHeaderMonetarySummation",
-            tax_currency_code=(self.tax_currency_code if self.tax_currency_code else self.invoice_currency_code),
-            profile=profile))
+            "SpecifiedTradeSettlementHeaderMonetarySummation", profile,
+            tax_currency_code=(self.tax_currency_code if self.tax_currency_code else self.invoice_currency_code)))
 
         if profile != InvoiceProfile.MINIMUM:
             # InvoiceReferencedDocument

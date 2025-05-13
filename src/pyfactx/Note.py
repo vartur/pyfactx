@@ -11,7 +11,7 @@ class Note(BaseModel):
     content: str = Field(...)
     subject_code: Optional[str] = Field(default=None)  # https://service.unece.org/trade/untdid/d00a/tred/tred4451.htm
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # Content

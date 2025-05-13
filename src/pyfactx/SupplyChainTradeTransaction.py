@@ -13,7 +13,7 @@ class SupplyChainTradeTransaction(BaseModel):
     applicable_header_trade_delivery: HeaderTradeDelivery = Field(...)
     applicable_header_trade_settlement: HeaderTradeSettlement = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 
         # ApplicableHeaderTradeAgreement

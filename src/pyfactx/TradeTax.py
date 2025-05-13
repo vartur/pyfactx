@@ -21,7 +21,7 @@ class TradeTax(BaseModel):
     due_date_type_code: Optional[TimeReferenceCode] = Field(default=None)
     rate_applicable_percent: Optional[float] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # CalculatedAmount

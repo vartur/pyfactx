@@ -15,7 +15,7 @@ class TradeSettlementPaymentMeans(BaseModel):
     payer_party_debtor_financial_account: Optional[DebtorFinancialAccount] = Field(default=None)
     payee_party_creditor_financial_account: Optional[CreditorFinancialAccount] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # TypeCode

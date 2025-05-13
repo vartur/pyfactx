@@ -16,7 +16,7 @@ class TradeAddress(BaseModel):
     country: str = Field(...)
     country_subdivision: Optional[str] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:

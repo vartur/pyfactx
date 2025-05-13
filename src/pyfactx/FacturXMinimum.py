@@ -1,13 +1,12 @@
-from typing import ClassVar
-
-from pydantic import BaseModel, Field
 from xml.etree.ElementTree import Element, register_namespace
 
-from .InvoiceProfile import InvoiceProfile
-from .ExchangedDocumentContext import ExchangedDocumentContext
+from pydantic import BaseModel, Field
+
 from .ExchangedDocument import ExchangedDocument
+from .ExchangedDocumentContext import ExchangedDocumentContext
+from .InvoiceProfile import InvoiceProfile
 from .SupplyChainTradeTransaction import SupplyChainTradeTransaction
-from .namespaces import NAMESPACES, QUALIFIED, RSM
+from .namespaces import NAMESPACES, RSM
 
 
 class FacturXMinimum(BaseModel):

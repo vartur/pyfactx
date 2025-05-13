@@ -10,7 +10,7 @@ from .namespaces import RAM, UDT
 class SupplyChainEvent(BaseModel):
     occurrence_date: datetime = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM):
+    def to_xml(self, element_name: str, _profile: InvoiceProfile):
         root = Element(f"{RAM}:{element_name}")
 
         # OccurrenceDateTime

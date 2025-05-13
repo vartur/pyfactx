@@ -17,8 +17,7 @@ class TradeSettlementHeaderMonetarySummation(BaseModel):
     total_prepaid_amount: Optional[float] = Field(default=None)  # From BASICWL
     due_payable_amount: float = Field(...)
 
-    def to_xml(self, element_name: str, tax_currency_code: str = "EUR",
-               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str,  profile: InvoiceProfile, tax_currency_code: str = "EUR") -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         if profile != InvoiceProfile.MINIMUM:

@@ -11,7 +11,7 @@ class ExchangedDocumentContext(BaseModel):
     business_process_specified_document_context_parameter: Optional[str] = Field(default=None)
     guideline_specified_document_context_parameter: InvoiceProfile = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 
         # BusinessProcessSpecifiedDocumentContextParameter

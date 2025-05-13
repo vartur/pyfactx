@@ -11,7 +11,7 @@ class LegalOrganization(BaseModel):
     id: Optional[str] = Field(default=None)
     trading_business_name: Optional[str] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # ID

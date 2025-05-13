@@ -13,7 +13,7 @@ class TradePaymentTerms(BaseModel):
     due_date: Optional[datetime] = Field(default=None)
     direct_debit_mandate_id: Optional[str] = Field(default=None)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
+    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # Description
