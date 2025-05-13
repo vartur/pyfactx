@@ -15,24 +15,22 @@ class FacturXMinimum(BaseModel):
     exchanged_document: ExchangedDocument = Field(...)
     supply_chain_transaction: SupplyChainTradeTransaction = Field(...)
 
-    profile: ClassVar[InvoiceProfile] = InvoiceProfile.MINIMUM
-
-    def to_xml(self) -> Element:
+    def to_xml(self, profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
         for prefix, uri in NAMESPACES.items():
             register_namespace(prefix, uri)
 
         # CrossIndustryInvoice
-        root = Element(f"{RSM}CrossIndustryInvoice", {
+        root = Element(f"{RSM}:CrossIndustryInvoice", {
             f"xmlns:{k}": v for k, v in NAMESPACES.items()
         })
 
         # ExchangedDocumentContext
-        root.append(self.exchanged_document_context.to_xml("ExchangedDocumentContext", self.profile))
+        root.append(self.exchanged_document_context.to_xml("ExchangedDocumentContext", profile))
 
         # ExchangedDocument
-        root.append(self.exchanged_document.to_xml("ExchangedDocument", self.profile))
+        root.append(self.exchanged_document.to_xml("ExchangedDocument", profile))
 
         # SupplyChainTradeTransaction
-        root.append(self.supply_chain_transaction.to_xml("SupplyChainTradeTransaction", self.profile))
+        root.append(self.supply_chain_transaction.to_xml("SupplyChainTradeTransaction", profile))
 
         return root

@@ -23,7 +23,7 @@ class ExchangedDocument(BaseModel):
         SubElement(root, f"{RAM}:ID").text = self.id
 
         # TypeCode
-        SubElement(root, f"{RAM}:TypeCode").text = self.type_code.value
+        SubElement(root, f"{RAM}:TypeCode").text = str(self.type_code.value)
 
         # IssueDateTime
         issue_dt_element = SubElement(root, f"{RAM}:IssueDateTime")

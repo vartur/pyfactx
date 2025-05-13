@@ -61,8 +61,9 @@ class HeaderTradeSettlement(BaseModel):
                     root.append(payment_means.to_xml("SpecifiedTradeSettlementPaymentMeans", profile))
 
             # ApplicableTradeTax
-            for trade_tax in self.applicable_trade_tax:
-                root.append(trade_tax.to_xml("ApplicableTradeTax", profile))
+            if self.applicable_trade_tax:
+                for trade_tax in self.applicable_trade_tax:
+                    root.append(trade_tax.to_xml("ApplicableTradeTax", profile))
 
             # BillingSpecifiedPeriod
             if self.billing_specified_period:

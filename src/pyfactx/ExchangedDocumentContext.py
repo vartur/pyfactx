@@ -23,6 +23,6 @@ class ExchangedDocumentContext(BaseModel):
         # GuidelineSpecifiedDocumentContextParameter
         guideline_spec_param_elem = SubElement(root, f"{RAM}:GuidelineSpecifiedDocumentContextParameter")
         SubElement(guideline_spec_param_elem,
-                   f"{RAM}:ID").text = self.guideline_specified_document_context_parameter.value()
+                   f"{RAM}:ID").text = profile
 
         return root

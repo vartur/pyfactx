@@ -39,7 +39,7 @@ class TradeAllowanceCharge(BaseModel):
 
         # ReasonCode
         if self.reason_code:
-            SubElement(root, f"{RAM}:ReasonCode").text = self.reason_code.value()
+            SubElement(root, f"{RAM}:ReasonCode").text = self.reason_code
 
         # Reason
         if self.reason:

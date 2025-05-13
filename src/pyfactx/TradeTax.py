@@ -29,7 +29,7 @@ class TradeTax(BaseModel):
             SubElement(root, f"{RAM}:CalculatedAmount").text = str(self.calculated_amount)
 
         # TypeCode
-        SubElement(root, f"{RAM}:TypeCode").text = self.type_code.value()
+        SubElement(root, f"{RAM}:TypeCode").text = self.type_code
 
         # ExemptionReason
         if self.exemption_reason:
@@ -40,15 +40,15 @@ class TradeTax(BaseModel):
             SubElement(root, f"{RAM}:BasisAmount").text = str(self.basis_amount)
 
         # CategoryCode
-        SubElement(root, f"{RAM}:CategoryCode").text = self.category_code.value()
+        SubElement(root, f"{RAM}:CategoryCode").text = self.category_code
 
         # ExemptionReasonCode
         if self.exemption_reason_code:
-            SubElement(root, f"{RAM}:ExemptionReasonCode").text = self.exemption_reason_code.value()
+            SubElement(root, f"{RAM}:ExemptionReasonCode").text = self.exemption_reason_code
 
         # DueDateTypeCode
         if self.due_date_type_code:
-            SubElement(root, f"{RAM}:DueDateTypeCode").text = self.due_date_type_code.value()
+            SubElement(root, f"{RAM}:DueDateTypeCode").text = self.due_date_type_code
 
         # RateApplicablePercent
         if self.rate_applicable_percent:

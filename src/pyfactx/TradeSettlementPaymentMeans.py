@@ -19,7 +19,7 @@ class TradeSettlementPaymentMeans(BaseModel):
         root = Element(f"{RAM}:{element_name}")
 
         # TypeCode
-        SubElement(root, f"{RAM}:TypeCode").text = self.payment_means_code.value()
+        SubElement(root, f"{RAM}:TypeCode").text = str(self.payment_means_code.value)
 
         # PayerPartyDebtorFinancialAccount
         if self.payer_party_debtor_financial_account:
