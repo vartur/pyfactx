@@ -6,6 +6,8 @@ from pydantic import Field
 from .InvoiceProfile import InvoiceProfile
 from .LegalOrganization import LegalOrganization
 from .TradeAddress import TradeAddress
+from .TradeContact import TradeContact
+from .UniversalCommunication import UniversalCommunication
 from .XMLBaseModel import XMLBaseModel
 from .namespaces import RAM
 
@@ -15,16 +17,18 @@ class TradeParty(XMLBaseModel):
     global_ids: Optional[list[tuple[str, str]]] = Field(
         default=None)  # <ram:GlobalID schemeID="0088">587451236587</ram:GlobalID>
     name: str = Field(...)
+    description: Optional[str] = Field(default=None)  # From EN16931
     specified_legal_organisation: Optional[LegalOrganization] = Field(default=None)  # Mandatory for seller
+    defined_trade_contact: Optional[TradeContact] = Field(default=None)  # From EN16931
     trade_address: Optional[TradeAddress] = Field(default=None)  # Mandatory for seller
-    uri_universal_communication: Optional[str] = Field(default=None)  # e-mail
+    uri_universal_communication: Optional[UniversalCommunication] = Field(default=None)  # e-mail
     specified_tax_registration: Optional[str] = Field(default=None)
 
     @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # IDs
             if self.ids:
                 for identifier in self.ids:
@@ -38,20 +42,28 @@ class TradeParty(XMLBaseModel):
         # Name
         SubElement(root, f"{RAM}:Name").text = self.name
 
+        if profile >= InvoiceProfile.EN16931:
+            # Description
+            if self.description:
+                SubElement(root, f"{RAM}:Description").text = self.description
+
         # SpecifiedLegalOrganization
         if self.specified_legal_organisation:
             root.append(self.specified_legal_organisation.to_xml("SpecifiedLegalOrganization", profile))
+
+        if profile >= InvoiceProfile.EN16931:
+            # DefinedTradeContact
+            if self.defined_trade_contact:
+                root.append(self.defined_trade_contact.to_xml("DefinedTradeContact", profile))
 
         # PostalTradeAddress
         if self.trade_address:
             root.append(self.trade_address.to_xml("PostalTradeAddress", profile))
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # URIUniversalCommunication
             if self.uri_universal_communication:
-                uri_univ_element = SubElement(root, f"{RAM}:URIUniversalCommunication")
-                SubElement(uri_univ_element, f"{RAM}:URIID",
-                           attrib={"schemeID": "EM"}).text = self.uri_universal_communication
+                root.append(self.uri_universal_communication.to_xml("URIUniversalCommunication", profile))
 
         # SpecifiedTaxRegistration
         if self.specified_tax_registration:

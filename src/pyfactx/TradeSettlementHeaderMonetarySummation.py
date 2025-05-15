@@ -14,6 +14,7 @@ class TradeSettlementHeaderMonetarySummation(XMLBaseModel):
     allowance_total_amount: Optional[float] = Field(default=None)  # From BASICWL
     tax_basis_total_amount: float = Field(...)
     tax_total_amount: Optional[float] = Field(default=None)
+    rounding_amount: Optional[float] = Field(default=None)  # From EN16931
     tax_currency_code: Optional[str] = Field(default="EUR")
     grand_total_amount: float = Field(...)
     total_prepaid_amount: Optional[float] = Field(default=None)  # From BASICWL
@@ -23,7 +24,7 @@ class TradeSettlementHeaderMonetarySummation(XMLBaseModel):
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # LineTotalAmount
             if self.line_total_amount:
                 SubElement(root, f"{RAM}:LineTotalAmount").text = str(self.line_total_amount)
@@ -44,10 +45,14 @@ class TradeSettlementHeaderMonetarySummation(XMLBaseModel):
             attrib = {"currencyID": self.tax_currency_code} if self.tax_currency_code else {}
             SubElement(root, f"{RAM}:TaxTotalAmount", attrib=attrib).text = str(self.tax_total_amount)
 
+        if profile >= InvoiceProfile.EN16931:
+            if self.rounding_amount:
+                SubElement(root, f"{RAM}:RoundingAmount").text = str(self.rounding_amount)
+
         # GrandTotalAmount
         SubElement(root, f"{RAM}:GrandTotalAmount").text = str(self.grand_total_amount)
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # TotalPrepaidAmount
             if self.total_prepaid_amount:
                 SubElement(root, f"{RAM}:TotalPrepaidAmount").text = str(self.total_prepaid_amount)

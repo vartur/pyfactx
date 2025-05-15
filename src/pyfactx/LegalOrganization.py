@@ -20,7 +20,7 @@ class LegalOrganization(XMLBaseModel):
         if self.id:
             SubElement(root, f"{RAM}:ID", attrib={"schemeID": "0002"}).text = self.id
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # TradingBusinessName
             SubElement(root, f"{RAM}:TradingBusinessName").text = self.trading_business_name
 

@@ -36,7 +36,7 @@ class HeaderTradeSettlement(XMLBaseModel):
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # CreditorReferenceID
             if self.creditor_reference_id:
                 SubElement(root, f"{RAM}:CreditorReferenceID").text = self.creditor_reference_id
@@ -52,7 +52,7 @@ class HeaderTradeSettlement(XMLBaseModel):
         # InvoiceCurrencyCode
         SubElement(root, f"{RAM}:InvoiceCurrencyCode").text = self.invoice_currency_code
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # PayeeTradeParty
             if self.payee_trade_party:
                 root.append(self.payee_trade_party.to_xml("PayeeTradeParty", profile))
@@ -84,7 +84,7 @@ class HeaderTradeSettlement(XMLBaseModel):
         root.append(self.specified_trade_settlement_header_monetary_summation.to_xml(
             "SpecifiedTradeSettlementHeaderMonetarySummation", profile))
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # InvoiceReferencedDocument
             if self.invoice_referenced_documents:
                 for ref_doc in self.invoice_referenced_documents:

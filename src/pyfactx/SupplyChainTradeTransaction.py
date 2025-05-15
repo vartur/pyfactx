@@ -23,7 +23,7 @@ class SupplyChainTradeTransaction(XMLBaseModel):
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RSM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM and profile != InvoiceProfile.BASICWL:
+        if profile >= InvoiceProfile.BASIC:
             # IncludedSupplyChainTradeLineItems
             if self.included_supply_chain_trade_line_items:
                 for line_item in self.included_supply_chain_trade_line_items:

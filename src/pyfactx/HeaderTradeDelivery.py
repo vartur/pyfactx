@@ -15,12 +15,13 @@ class HeaderTradeDelivery(XMLBaseModel):
     ship_to_trade_party: Optional[TradeParty] = Field(default=None)
     actual_delivery_supply_chain_event: Optional[SupplyChainEvent] = Field(default=None)
     despatch_advice_referenced_document: Optional[ReferencedDocument] = Field(default=None)
+    receiving_advice_referenced_document: Optional[ReferencedDocument] = Field(default=None)
 
     @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # ShipToTradeParty
             if self.ship_to_trade_party:
                 root.append(self.ship_to_trade_party.to_xml("ShipToTradeParty", profile))
@@ -33,5 +34,10 @@ class HeaderTradeDelivery(XMLBaseModel):
             if self.despatch_advice_referenced_document:
                 root.append(
                     self.despatch_advice_referenced_document.to_xml("DespatchAdviceReferencedDocument", profile))
+
+        if profile >= InvoiceProfile.EN16931:
+            if self.receiving_advice_referenced_document:
+                root.append(
+                    self.receiving_advice_referenced_document.to_xml("ReceivingAdviceReferencedDocument", profile))
 
         return root

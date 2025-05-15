@@ -33,8 +33,9 @@ class ExchangedDocument(XMLBaseModel):
                    attrib={"format": "102"}).text = self.issue_date_time.strftime("%Y%m%d")
 
         # IncludedNotes
-        if profile != InvoiceProfile.MINIMUM and self.included_notes:
-            for note in self.included_notes:
-                root.append(note.to_xml("IncludedNote", profile))
+        if profile >= InvoiceProfile.BASICWL:
+            if self.included_notes:
+                for note in self.included_notes:
+                    root.append(note.to_xml("IncludedNote", profile))
 
         return root

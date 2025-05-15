@@ -22,7 +22,7 @@ class TradeAddress(XMLBaseModel):
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # PostcodeCode
             if self.postcode:
                 SubElement(root, f"{RAM}:PostcodeCode").text = self.postcode
@@ -46,7 +46,7 @@ class TradeAddress(XMLBaseModel):
         # CountryID
         SubElement(root, f"{RAM}:CountryID").text = self.country
 
-        if profile != InvoiceProfile.MINIMUM:
+        if profile >= InvoiceProfile.BASICWL:
             # CountrySubdivisionName
             if self.country_subdivision:
                 SubElement(root, f"{RAM}:CountrySubDivisionName").text = self.country_subdivision

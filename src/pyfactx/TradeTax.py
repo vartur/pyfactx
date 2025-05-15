@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, override
 from xml.etree.ElementTree import Element, SubElement
 
@@ -9,7 +10,7 @@ from .TaxTypeCode import TaxTypeCode
 from .TimeReferenceCode import TimeReferenceCode
 from .VATExemptionReasonCode import VATExemptionReasonCode
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import RAM, UDT
 
 
 class TradeTax(XMLBaseModel):
@@ -19,11 +20,12 @@ class TradeTax(XMLBaseModel):
     basis_amount: Optional[float] = Field(default=None)
     category_code: TaxCategoryCode = Field(...)
     exemption_reason_code: Optional[VATExemptionReasonCode] = Field(default=None)
+    tax_point_date: Optional[datetime] = Field(default=None)  # From EN16931
     due_date_type_code: Optional[TimeReferenceCode] = Field(default=None)
     rate_applicable_percent: Optional[float] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
         root = Element(f"{RAM}:{element_name}")
 
         # CalculatedAmount
@@ -47,6 +49,13 @@ class TradeTax(XMLBaseModel):
         # ExemptionReasonCode
         if self.exemption_reason_code:
             SubElement(root, f"{RAM}:ExemptionReasonCode").text = self.exemption_reason_code
+
+        if profile >= InvoiceProfile.EN16931:
+            # TaxPointDate
+            if self.tax_point_date:
+                tax_point_element = SubElement(root, f"{RAM}:TaxPointDate")
+                SubElement(tax_point_element, f"{UDT}:DateString",
+                           attrib={"format": "102"}).text = self.tax_point_date.strftime("%Y%m%d")
 
         # DueDateTypeCode
         if self.due_date_type_code:
