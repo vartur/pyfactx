@@ -1,12 +1,12 @@
 from typing import Optional
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeAddress(XMLBaseModel):
@@ -19,36 +19,36 @@ class TradeAddress(XMLBaseModel):
     country_subdivision: Optional[str] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         if profile >= InvoiceProfile.BASICWL:
             # PostcodeCode
             if self.postcode:
-                SubElement(root, f"{RAM}:PostcodeCode").text = self.postcode
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}PostcodeCode").text = self.postcode
 
             # LineOne
             if self.line_one:
-                SubElement(root, f"{RAM}:LineOne").text = self.line_one
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}LineOne").text = self.line_one
 
             # LineTwo
             if self.line_two:
-                SubElement(root, f"{RAM}:LineTwo").text = self.line_two
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}LineTwo").text = self.line_two
 
             # LineThree
             if self.line_three:
-                SubElement(root, f"{RAM}:LineThree").text = self.line_three
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}LineThree").text = self.line_three
 
             # CityName
             if self.city:
-                SubElement(root, f"{RAM}:CityName").text = self.city
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CityName").text = self.city
 
         # CountryID
-        SubElement(root, f"{RAM}:CountryID").text = self.country
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CountryID").text = self.country
 
         if profile >= InvoiceProfile.BASICWL:
             # CountrySubdivisionName
             if self.country_subdivision:
-                SubElement(root, f"{RAM}:CountrySubDivisionName").text = self.country_subdivision
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CountrySubDivisionName").text = self.country_subdivision
 
         return root

@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override, Optional
@@ -9,7 +9,7 @@ from .HeaderTradeSettlement import HeaderTradeSettlement
 from .InvoiceProfile import InvoiceProfile
 from .SupplyChainTradeLineItem import SupplyChainTradeLineItem
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RSM
+from .namespaces import NAMESPACES, RSM
 
 
 class SupplyChainTradeTransaction(XMLBaseModel):
@@ -20,8 +20,8 @@ class SupplyChainTradeTransaction(XMLBaseModel):
     applicable_header_trade_settlement: HeaderTradeSettlement = Field(...)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RSM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RSM]}}}{element_name}")
 
         if profile >= InvoiceProfile.BASIC:
             # IncludedSupplyChainTradeLineItems

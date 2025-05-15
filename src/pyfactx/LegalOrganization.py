@@ -1,11 +1,11 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class LegalOrganization(XMLBaseModel):
@@ -13,15 +13,15 @@ class LegalOrganization(XMLBaseModel):
     trading_business_name: Optional[str] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # ID
         if self.id:
-            SubElement(root, f"{RAM}:ID", attrib={"schemeID": "0002"}).text = self.id
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ID", attrib={"schemeID": "0002"}).text = self.id
 
         if profile >= InvoiceProfile.BASICWL:
             # TradingBusinessName
-            SubElement(root, f"{RAM}:TradingBusinessName").text = self.trading_business_name
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TradingBusinessName").text = self.trading_business_name
 
         return root

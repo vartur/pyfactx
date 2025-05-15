@@ -1,6 +1,6 @@
 import datetime
-from xml.etree.ElementTree import tostring, Element
-from xml.dom import minidom
+from lxml import etree as ET
+from lxml.isoschematron import Schematron
 
 from src.pyfactx.DocumentLineDocument import DocumentLineDocument
 from src.pyfactx.ExchangedDocument import ExchangedDocument
@@ -34,7 +34,7 @@ from src.pyfactx.TradeTax import TradeTax
 from src.pyfactx.UnitCode import UnitCode
 
 
-def generate_facturx_minimum() -> Element:
+def generate_facturx_minimum() -> ET.Element:
     doc_context = ExchangedDocumentContext(guideline_specified_document_context_parameter=InvoiceProfile.MINIMUM)
     document = ExchangedDocument(id="INV-ABCDEF", issue_date_time=datetime.datetime(year=2025, month=4, day=25))
 
@@ -60,7 +60,7 @@ def generate_facturx_minimum() -> Element:
     return facturx_minimum.to_xml()
 
 
-def generate_facturx_basic_wl() -> Element:
+def generate_facturx_basic_wl() -> ET.Element:
     doc_context = ExchangedDocumentContext(guideline_specified_document_context_parameter=InvoiceProfile.BASICWL)
     document = ExchangedDocument(id="INV-ABCDEF", issue_date_time=datetime.datetime(year=2025, month=4, day=25))
 
@@ -93,7 +93,7 @@ def generate_facturx_basic_wl() -> Element:
     return facturx_basic_wl.to_xml()
 
 
-def generate_facturx_basic():
+def generate_facturx_basic() -> ET.Element:
     doc_context = ExchangedDocumentContext(guideline_specified_document_context_parameter=InvoiceProfile.BASIC)
     document = ExchangedDocument(id="INV-ABCDEF", issue_date_time=datetime.datetime(year=2025, month=4, day=25))
 
@@ -142,7 +142,7 @@ def generate_facturx_basic():
     return facturx_basic.to_xml()
 
 
-def generate_facturx_en16931():
+def generate_facturx_en16931(validate: bool = False) -> ET.Element:
     doc_context = ExchangedDocumentContext(guideline_specified_document_context_parameter=InvoiceProfile.EN16931)
     document = ExchangedDocument(id="INV-ABCDEF", issue_date_time=datetime.datetime(year=2025, month=4, day=25))
 
@@ -188,12 +188,22 @@ def generate_facturx_en16931():
     facturx_en16931 = FacturXEN16931(exchanged_document_context=doc_context, exchanged_document=document,
                                      supply_chain_transaction=transaction)
 
-    return facturx_en16931.to_xml()
+    xml_doc = facturx_en16931.to_xml()
+
+    # if validate:
+    #     schematron_doc = ET.parse("./src/pyfactx/resources/3_en16931/Factur-X_1.07.2_EN16931.sch")
+    #     schematron = Schematron(schematron_doc, store_report=True)
+    #     is_valid = schematron.validate(xml_doc)
+    #     print("Valid?", is_valid)
+    #
+    #     if not is_valid:
+    #         print(ET.tostring(schematron.validation_report, pretty_print=True).decode())
+
+    return xml_doc
 
 
 if __name__ == '__main__':
     xml = generate_facturx_en16931()
 
-    xml_string = tostring(xml, encoding='utf-8')
-    pretty_xml_string = minidom.parseString(xml_string).toprettyxml(indent="  ")
-    print(pretty_xml_string)
+    xml_string = ET.tostring(xml, pretty_print=True, encoding='utf-8').decode('utf-8')
+    print(xml_string)

@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -8,7 +8,7 @@ from .Indicator import Indicator
 from .InvoiceProfile import InvoiceProfile
 from .TradeTax import TradeTax
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeAllowanceCharge(XMLBaseModel):
@@ -21,30 +21,30 @@ class TradeAllowanceCharge(XMLBaseModel):
     category_trade_tax: TradeTax = Field(...)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # ChargeIndicator
         root.append(self.charge_indicator.to_xml("ChargeIndicator", profile))
 
         # CalculationPercent
         if self.calculation_percent:
-            SubElement(root, f"{RAM}:CalculationPercent").text = str(self.calculation_percent)
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CalculationPercent").text = str(self.calculation_percent)
 
         # BasisAmount
         if self.basis_amount:
-            SubElement(root, f"{RAM}:BasisAmount").text = str(self.basis_amount)
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}BasisAmount").text = str(self.basis_amount)
 
         # ActualAmount
-        SubElement(root, f"{RAM}:ActualAmount").text = str(self.actual_amount)
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ActualAmount").text = str(self.actual_amount)
 
         # ReasonCode
         if self.reason_code:
-            SubElement(root, f"{RAM}:ReasonCode").text = self.reason_code.value
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ReasonCode").text = self.reason_code.value
 
         # Reason
         if self.reason:
-            SubElement(root, f"{RAM}:Reason").text = self.reason
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Reason").text = self.reason
 
         # CategoryTradeTax
         root.append(self.category_trade_tax.to_xml("CategoryTradeTax", profile))

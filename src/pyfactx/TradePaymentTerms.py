@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM, UDT
+from .namespaces import NAMESPACES, RAM, UDT
 
 
 class TradePaymentTerms(XMLBaseModel):
@@ -15,21 +15,22 @@ class TradePaymentTerms(XMLBaseModel):
     direct_debit_mandate_id: Optional[str] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, _profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # Description
         if self.description:
-            SubElement(root, f"{RAM}:Description").text = self.description
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Description").text = self.description
 
         # DueDateDateTime
         if self.due_date:
-            due_date_elem = SubElement(root, f"{RAM}:DueDateDateTime")
-            SubElement(due_date_elem, f"{UDT}:DateTimeString", attrib={"format": "102"}).text = self.due_date.strftime(
+            due_date_elem = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}DueDateDateTime")
+            ET.SubElement(due_date_elem, f"{{{NAMESPACES[UDT]}}}DateTimeString",
+                          attrib={"format": "102"}).text = self.due_date.strftime(
                 "%Y%m%d")
 
         # DirectDebitMandateID
         if self.direct_debit_mandate_id:
-            SubElement(root, f"{RAM}:DirectDebitMandateID").text = self.direct_debit_mandate_id
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}DirectDebitMandateID").text = self.direct_debit_mandate_id
 
         return root

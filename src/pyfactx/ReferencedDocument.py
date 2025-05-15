@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
@@ -9,7 +9,7 @@ from .BinaryObject import BinaryObject
 from .DocumentTypeCode import DocumentTypeCode
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM, UDT
+from .namespaces import NAMESPACES, RAM, UDT
 
 
 class ReferencedDocument(XMLBaseModel):
@@ -23,29 +23,29 @@ class ReferencedDocument(XMLBaseModel):
     issue_date: Optional[datetime] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # IssuerAssignedID
         if self.issuer_assigned_id:
-            SubElement(root, f"{RAM}:IssuerAssignedID").text = self.issuer_assigned_id
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}IssuerAssignedID").text = self.issuer_assigned_id
 
         if profile >= InvoiceProfile.EN16931:
             # URIID
             if self.uri_id:
-                SubElement(root, f"{RAM}:URIID").text = self.uri_id
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}URIID").text = self.uri_id
 
             # LineID
             if self.line_id:
-                SubElement(root, f"{RAM}:LineID").text = self.line_id
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}LineID").text = self.line_id
 
             # TypeCode
             if self.type_code:
-                SubElement(root, f"{RAM}:TypeCode").text = str(self.type_code.value)
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TypeCode").text = str(self.type_code.value)
 
             # Name
             if self.name:
-                SubElement(root, f"{RAM}:Name").text = self.name
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Name").text = self.name
 
             # AttachmentBinaryObject
             if self.attachment_binary_object:
@@ -53,11 +53,11 @@ class ReferencedDocument(XMLBaseModel):
 
             # ReferenceTypeCode
             if self.reference_type_code:
-                SubElement(root, f"{RAM}:ReferenceTypeCode").text = self.reference_type_code
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ReferenceTypeCode").text = self.reference_type_code
 
             # FormattedIssueDateTime
-            issue_dt_element = SubElement(root, f"{RAM}:FormattedIssueDateTime")
-            SubElement(issue_dt_element, f"{UDT}:DateTimeString",
-                       attrib={"format": "102"}).text = self.issue_date.strftime("%Y%m%d")
+            issue_dt_element = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}FormattedIssueDateTime")
+            ET.SubElement(issue_dt_element, f"{{{NAMESPACES[UDT]}}}DateTimeString",
+                          attrib={"format": "102"}).text = self.issue_date.strftime("%Y%m%d")
 
         return root

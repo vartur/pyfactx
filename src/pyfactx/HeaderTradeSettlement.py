@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -14,7 +14,7 @@ from .TradeSettlementHeaderMonetarySummation import TradeSettlementHeaderMonetar
 from .TradeSettlementPaymentMeans import TradeSettlementPaymentMeans
 from .TradeTax import TradeTax
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class HeaderTradeSettlement(XMLBaseModel):
@@ -33,24 +33,24 @@ class HeaderTradeSettlement(XMLBaseModel):
     receivable_specified_trade_accounting_account: Optional[TradeAccountingAccount] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         if profile >= InvoiceProfile.BASICWL:
             # CreditorReferenceID
             if self.creditor_reference_id:
-                SubElement(root, f"{RAM}:CreditorReferenceID").text = self.creditor_reference_id
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CreditorReferenceID").text = self.creditor_reference_id
 
             # PaymentReference
             if self.payment_reference:
-                SubElement(root, f"{RAM}:PaymentReference").text = self.payment_reference
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}PaymentReference").text = self.payment_reference
 
             # TaxCurrencyCode
             if self.tax_currency_code:
-                SubElement(root, f"{RAM}:TaxCurrencyCode").text = self.tax_currency_code
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TaxCurrencyCode").text = self.tax_currency_code
 
         # InvoiceCurrencyCode
-        SubElement(root, f"{RAM}:InvoiceCurrencyCode").text = self.invoice_currency_code
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}InvoiceCurrencyCode").text = self.invoice_currency_code
 
         if profile >= InvoiceProfile.BASICWL:
             # PayeeTradeParty

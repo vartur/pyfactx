@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element, register_namespace
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
@@ -18,14 +18,9 @@ class FacturXMinimum(XMLBaseModel):
 
     @override
     def to_xml(self, element_name: str = "CrossIndustryInvoice",
-               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> Element:
-        for prefix, uri in NAMESPACES.items():
-            register_namespace(prefix, uri)
-
+               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> ET.Element:
         # CrossIndustryInvoice
-        root = Element(f"{RSM}:{element_name}", {
-            f"xmlns:{k}": v for k, v in NAMESPACES.items()
-        })
+        root = ET.Element(f"{{{NAMESPACES[RSM]}}}{element_name}", nsmap=NAMESPACES)
 
         # ExchangedDocumentContext
         root.append(self.exchanged_document_context.to_xml("ExchangedDocumentContext", profile))

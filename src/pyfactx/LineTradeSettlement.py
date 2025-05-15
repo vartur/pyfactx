@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -11,7 +11,7 @@ from .TradeAllowanceCharge import TradeAllowanceCharge
 from .TradeSettlementLineMonetarySummation import TradeSettlementLineMonetarySummation
 from .TradeTax import TradeTax
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class LineTradeSettlement(XMLBaseModel):
@@ -24,8 +24,8 @@ class LineTradeSettlement(XMLBaseModel):
         default=None)  # From EN16931
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # ApplicableTradeTax
         root.append(self.applicable_trade_tax.to_xml("ApplicableTradeTax", profile))

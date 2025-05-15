@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -7,7 +7,7 @@ from .InvoiceProfile import InvoiceProfile
 from .ReferencedDocument import ReferencedDocument
 from .TradePrice import TradePrice
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class LineTradeAgreement(XMLBaseModel):
@@ -16,8 +16,8 @@ class LineTradeAgreement(XMLBaseModel):
     net_price_product_trade_price: TradePrice = Field(...)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         if profile >= InvoiceProfile.EN16931:
             # BuyerOrderReferencedDocument

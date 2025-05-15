@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -8,7 +8,7 @@ from .ProductCharacteristic import ProductCharacteristic
 from .ProductClassification import ProductClassification
 from .TradeCountry import TradeCountry
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeProduct(XMLBaseModel):
@@ -22,29 +22,29 @@ class TradeProduct(XMLBaseModel):
     origin_trade_country: Optional[TradeCountry] = Field(default=None)  # From EN16931
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # GlobalID
         if self.global_id:
-            SubElement(root, f"{RAM}:GlobalID").text = self.global_id
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}GlobalID").text = self.global_id
 
         if profile >= InvoiceProfile.EN16931:
             # SellerAssignedID
             if self.seller_assigned_id:
-                SubElement(root, f"{RAM}:SellerAssignedID").text = self.seller_assigned_id
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}SellerAssignedID").text = self.seller_assigned_id
 
             # BuyerAssignedID
             if self.buyer_assigned_id:
-                SubElement(root, f"{RAM}:BuyerAssignedID").text = self.buyer_assigned_id
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}BuyerAssignedID").text = self.buyer_assigned_id
 
         # Name
-        SubElement(root, f"{RAM}:Name").text = self.name
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Name").text = self.name
 
         if profile >= InvoiceProfile.EN16931:
             # Description
             if self.description:
-                SubElement(root, f"{RAM}:Description").text = self.description
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Description").text = self.description
 
             # ApplicableProductCharacteristic
             if self.applicable_product_characteristics:

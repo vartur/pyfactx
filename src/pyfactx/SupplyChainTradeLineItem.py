@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
@@ -10,7 +10,7 @@ from .LineTradeDelivery import LineTradeDelivery
 from .LineTradeSettlement import LineTradeSettlement
 from .TradeProduct import TradeProduct
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class SupplyChainTradeLineItem(XMLBaseModel):
@@ -21,8 +21,8 @@ class SupplyChainTradeLineItem(XMLBaseModel):
     specified_line_trade_settlement: LineTradeSettlement = Field(...)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # AssociatedDocumentLineDocument
         root.append(self.associated_document_line_document.to_xml("AssociatedDocumentLineDocument", profile))

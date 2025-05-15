@@ -1,23 +1,23 @@
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class ProductCharacteristic(XMLBaseModel):
     description: str = Field(...)
     value: str = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # Description
-        SubElement(root, f"{RAM}:Description").text = self.description
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Description").text = self.description
 
         # Value
-        SubElement(root, f"{RAM}:Value").text = self.value
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Value").text = self.value
 
         return root

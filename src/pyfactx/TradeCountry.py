@@ -1,19 +1,19 @@
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeCountry(XMLBaseModel):
     country_id: str = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # ID
-        SubElement(root, f"{RAM}:ID").text = self.country_id
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ID").text = self.country_id
 
         return root

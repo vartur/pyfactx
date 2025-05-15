@@ -1,5 +1,5 @@
 from typing import Optional
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
@@ -11,7 +11,7 @@ from .InvoiceProfile import InvoiceProfile
 from .PaymentMeansCode import PaymentMeansCode
 from .TradeSettlementFinancialCard import TradeSettlementFinancialCard
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeSettlementPaymentMeans(XMLBaseModel):
@@ -25,16 +25,16 @@ class TradeSettlementPaymentMeans(XMLBaseModel):
         default=None)  # From EN16931
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # TypeCode
-        SubElement(root, f"{RAM}:TypeCode").text = str(self.payment_means_code.value)
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TypeCode").text = str(self.payment_means_code.value)
 
         if profile >= InvoiceProfile.EN16931:
             # Information
             if self.information:
-                SubElement(root, f"{RAM}:Information").text = self.information
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Information").text = self.information
 
             # ApplicableTradeSettlementFinancialCard
             if self.applicable_trade_settlement_financial_card:

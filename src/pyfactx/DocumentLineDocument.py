@@ -1,12 +1,12 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .Note import Note
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class DocumentLineDocument(XMLBaseModel):
@@ -14,11 +14,11 @@ class DocumentLineDocument(XMLBaseModel):
     included_note: Optional[Note] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # LineID
-        SubElement(root, f"{RAM}:LineID").text = str(self.line_id)
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}LineID").text = str(self.line_id)
 
         # IncludedNote
         if self.included_note:

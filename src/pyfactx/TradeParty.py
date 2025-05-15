@@ -1,5 +1,5 @@
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -9,7 +9,7 @@ from .TradeAddress import TradeAddress
 from .TradeContact import TradeContact
 from .UniversalCommunication import UniversalCommunication
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class TradeParty(XMLBaseModel):
@@ -25,27 +25,27 @@ class TradeParty(XMLBaseModel):
     specified_tax_registration: Optional[str] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         if profile >= InvoiceProfile.BASICWL:
             # IDs
             if self.ids:
                 for identifier in self.ids:
-                    SubElement(root, f"{RAM}:ID").text = identifier
+                    ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ID").text = identifier
 
             # GlobalIDs
             if self.global_ids:
                 for scheme_id, global_id in self.global_ids:
-                    SubElement(root, f"{RAM}:GlobalID", attrib={"schemeID": scheme_id}).text = global_id
+                    ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}GlobalID", attrib={"schemeID": scheme_id}).text = global_id
 
         # Name
-        SubElement(root, f"{RAM}:Name").text = self.name
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Name").text = self.name
 
         if profile >= InvoiceProfile.EN16931:
             # Description
             if self.description:
-                SubElement(root, f"{RAM}:Description").text = self.description
+                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Description").text = self.description
 
         # SpecifiedLegalOrganization
         if self.specified_legal_organisation:
@@ -67,7 +67,7 @@ class TradeParty(XMLBaseModel):
 
         # SpecifiedTaxRegistration
         if self.specified_tax_registration:
-            spec_tax_elem = SubElement(root, f"{RAM}:SpecifiedTaxRegistration")
-            SubElement(spec_tax_elem, f"{RAM}:ID", attrib={"schemeID": "VA"}).text = self.specified_tax_registration
+            spec_tax_elem = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}SpecifiedTaxRegistration")
+            ET.SubElement(spec_tax_elem, f"{{{NAMESPACES[RAM]}}}ID", attrib={"schemeID": "VA"}).text = self.specified_tax_registration
 
         return root

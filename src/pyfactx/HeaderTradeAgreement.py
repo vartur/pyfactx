@@ -1,5 +1,5 @@
 from typing import Optional
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 from typing_extensions import override
@@ -9,7 +9,7 @@ from .ProcuringProject import ProcuringProject
 from .ReferencedDocument import ReferencedDocument
 from .TradeParty import TradeParty
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class HeaderTradeAgreement(XMLBaseModel):
@@ -24,12 +24,12 @@ class HeaderTradeAgreement(XMLBaseModel):
     specified_procuring_project: Optional[ProcuringProject] = Field(default=None)  # From EN16931
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # BuyerReference
         if self.buyer_reference:
-            SubElement(root, f"{RAM}:BuyerReference").text = self.buyer_reference
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}BuyerReference").text = self.buyer_reference
 
         # SellerTradeParty
         root.append(self.seller_trade_party.to_xml("SellerTradeParty", profile))

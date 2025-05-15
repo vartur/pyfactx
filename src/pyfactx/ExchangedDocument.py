@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, override
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
@@ -8,7 +8,7 @@ from .InvoiceProfile import InvoiceProfile
 from .InvoiceTypeCode import InvoiceTypeCode
 from .Note import Note
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM, RSM, UDT
+from .namespaces import NAMESPACES, RAM, RSM, UDT
 
 
 class ExchangedDocument(XMLBaseModel):
@@ -18,19 +18,19 @@ class ExchangedDocument(XMLBaseModel):
     included_notes: Optional[list[Note]] = Field(default=None)
 
     @override
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RSM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RSM]}}}{element_name}")
 
         # ID
-        SubElement(root, f"{RAM}:ID").text = self.id
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ID").text = self.id
 
         # TypeCode
-        SubElement(root, f"{RAM}:TypeCode").text = str(self.type_code.value)
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TypeCode").text = str(self.type_code.value)
 
         # IssueDateTime
-        issue_dt_element = SubElement(root, f"{RAM}:IssueDateTime")
-        SubElement(issue_dt_element, f"{UDT}:DateTimeString",
-                   attrib={"format": "102"}).text = self.issue_date_time.strftime("%Y%m%d")
+        issue_dt_element = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}IssueDateTime")
+        ET.SubElement(issue_dt_element, f"{{{NAMESPACES[UDT]}}}DateTimeString",
+                      attrib={"format": "102"}).text = self.issue_date_time.strftime("%Y%m%d")
 
         # IncludedNotes
         if profile >= InvoiceProfile.BASICWL:

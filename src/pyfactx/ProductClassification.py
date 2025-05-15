@@ -1,22 +1,22 @@
 from typing import Optional
-from xml.etree.ElementTree import Element, SubElement
+from lxml import etree as ET
 
 from pydantic import Field
 
 from .InvoiceProfile import InvoiceProfile
 from .XMLBaseModel import XMLBaseModel
-from .namespaces import RAM
+from .namespaces import NAMESPACES, RAM
 
 
 class ProductClassification(XMLBaseModel):
     list_id: Optional[str] = Field(default=None)
     class_code: str = Field(...)
 
-    def to_xml(self, element_name: str, profile: InvoiceProfile) -> Element:
-        root = Element(f"{RAM}:{element_name}")
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # ClassCode
         attrib = {"listID": self.list_id} if self.list_id else {}
-        SubElement(root, f"{RAM}:ClassCode", attrib=attrib).text = self.class_code
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ClassCode", attrib=attrib).text = self.class_code
 
         return root
