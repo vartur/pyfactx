@@ -57,8 +57,9 @@ class TradeParty(XMLBaseModel):
                 root.append(self.defined_trade_contact.to_xml("DefinedTradeContact", profile))
 
         # PostalTradeAddress
-        if self.trade_address:
-            root.append(self.trade_address.to_xml("PostalTradeAddress", profile))
+        if profile > InvoiceProfile.MINIMUM or element_name == "SellerTradeParty":
+            if self.trade_address:
+                root.append(self.trade_address.to_xml("PostalTradeAddress", profile))
 
         if profile >= InvoiceProfile.BASICWL:
             # URIUniversalCommunication
@@ -66,8 +67,9 @@ class TradeParty(XMLBaseModel):
                 root.append(self.uri_universal_communication.to_xml("URIUniversalCommunication", profile))
 
         # SpecifiedTaxRegistration
-        if self.specified_tax_registration:
-            spec_tax_elem = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}SpecifiedTaxRegistration")
-            ET.SubElement(spec_tax_elem, f"{{{NAMESPACES[RAM]}}}ID", attrib={"schemeID": "VA"}).text = self.specified_tax_registration
+        if profile > InvoiceProfile.MINIMUM or element_name == "SellerTradeParty":
+            if self.specified_tax_registration:
+                spec_tax_elem = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}SpecifiedTaxRegistration")
+                ET.SubElement(spec_tax_elem, f"{{{NAMESPACES[RAM]}}}ID", attrib={"schemeID": "VA"}).text = self.specified_tax_registration
 
         return root

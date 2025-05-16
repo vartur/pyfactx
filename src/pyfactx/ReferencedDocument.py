@@ -56,8 +56,9 @@ class ReferencedDocument(XMLBaseModel):
                 ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ReferenceTypeCode").text = self.reference_type_code
 
             # FormattedIssueDateTime
-            issue_dt_element = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}FormattedIssueDateTime")
-            ET.SubElement(issue_dt_element, f"{{{NAMESPACES[UDT]}}}DateTimeString",
-                          attrib={"format": "102"}).text = self.issue_date.strftime("%Y%m%d")
+            if self.issue_date:
+                issue_dt_element = ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}FormattedIssueDateTime")
+                ET.SubElement(issue_dt_element, f"{{{NAMESPACES[UDT]}}}DateTimeString",
+                              attrib={"format": "102"}).text = self.issue_date.strftime("%Y%m%d")
 
         return root

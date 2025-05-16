@@ -20,7 +20,7 @@ class LegalOrganization(XMLBaseModel):
         if self.id:
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ID", attrib={"schemeID": "0002"}).text = self.id
 
-        if profile >= InvoiceProfile.BASICWL:
+        if profile >= InvoiceProfile.EN16931:
             # TradingBusinessName
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TradingBusinessName").text = self.trading_business_name
 

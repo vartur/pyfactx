@@ -11,14 +11,13 @@ from .XMLBaseModel import XMLBaseModel
 from .namespaces import NAMESPACES, RSM
 
 
-class FacturXMinimum(XMLBaseModel):
+class FacturXData(XMLBaseModel):
     exchanged_document_context: ExchangedDocumentContext = Field(...)
     exchanged_document: ExchangedDocument = Field(...)
     supply_chain_transaction: SupplyChainTradeTransaction = Field(...)
 
     @override
-    def to_xml(self, element_name: str = "CrossIndustryInvoice",
-               profile: InvoiceProfile = InvoiceProfile.MINIMUM) -> ET.Element:
+    def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
         # CrossIndustryInvoice
         root = ET.Element(f"{{{NAMESPACES[RSM]}}}{element_name}", nsmap=NAMESPACES)
 

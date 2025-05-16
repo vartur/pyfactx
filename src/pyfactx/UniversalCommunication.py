@@ -17,7 +17,8 @@ class UniversalCommunication(XMLBaseModel):
 
         # URIID
         if self.uri_id:
-            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}URIID", attrib={"schemeID": "EM"}).text = self.uri_id
+            attrib = {"schemeID": "EM"} if element_name == "URIUniversalCommunication" else {}
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}URIID", attrib=attrib).text = self.uri_id
 
         # CompleteNumber
         if self.complete_number:
