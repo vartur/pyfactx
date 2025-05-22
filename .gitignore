@@ -1,3 +1,5 @@
 .idea
 __pycache__/
 *.pyc
+dist
+src/pyfactx.egg-info

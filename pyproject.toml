@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "Python package using Pydantic models to generate FacturX-compliant documents"
 readme = "README.md"
 requires-python = ">=3.12"
-license = {text = "MIT"}
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
 authors = [{ name = "Vincent Artur", email = "6145191+vartur@users.noreply.github.com" }]
 dependencies = [
     "pydantic>=2.11.4,<3.0",
@@ -17,7 +20,16 @@ dependencies = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
+include-package-data = true
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+
+[tool.setuptools.package-data]
+pyfactx = ["resources/0_minimum/*", "resources/0_minimum/_XSLT_MINIMUM/*",
+    "resources/1_basicwl/*", "resources/1_basicwl/_XSLT_BASICWL/*",
+    "resources/2_basic/*", "resources/2_basic/_XSLT_BASIC/*",
+    "resources/3_en16931/*", "resources/3_en16931/_XSLT_EN16931/*"]
