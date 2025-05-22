@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=80.7.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyfactx"
+version = "0.1.0"
+description = "Python package using Pydantic models to generate FacturX-compliant documents"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [{ name = "Vincent Artur", email = "6145191+vartur@users.noreply.github.com" }]
+dependencies = [
+    "pydantic>=2.11.4,<3.0",
+    "lxml>=5.3.2,<6.0",
+    "saxonche>=12.7.0,<13.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

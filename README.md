@@ -1,3 +1,40 @@
+# PyFactX
+
+**PyFactX** is a Python library that leverages [Pydantic](https://docs.pydantic.dev/) models to generate fully
+compliant [Factur-X](https://www.factur-x.org/) (EN 16931) e-invoices. This library generates a structured XML file,
+suitable for machine processing, which can then be embedded in a hybrid PDF A/3 electronic invoice for full compliance
+with the European e-invoicing standards.
+
+---
+
+## ✨ Features
+
+- ✅ Full support for **EN 16931** compliant Factur-X invoices
+- 📦 Clean and robust **Pydantic models** for structured invoice data
+- 🧾 Generates **Factur-X-compliant XML** from Python dictionaries or Pydantic models
+- 🇪🇺 Compatible with European e-invoicing standards
+- 📄 Can be easily embedded into PDF invoices (e.g., via [facturelibre](https://github.com/vartur/facturelibre))
+
+---
+
+## 📦 Installation
+
+```bash
+pip install pyfactx
+```
+
+## ✅ Compliance
+
+PyFactX aims for full compliance with the following:
+
+* Factur-X Minimum/Basic/EN16931 profiles
+* EN 16931 UBL/CII syntax rules
+* PEPPOL BIS Billing 3.0 compatibility
+* Schematron validation support
+
+## 🚀 Quick Start
+
+```python
 import datetime
 from lxml import etree as ET
 
@@ -146,3 +183,20 @@ if __name__ == '__main__':
 
     xml_string = ET.tostring(xml, pretty_print=True, encoding='utf-8').decode('utf-8')
     print(xml_string)
+
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit issues, bug reports, or pull requests.
+
+## 📄 License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+## 🧾 About Factur-X
+
+Factur-X is the Franco-German standard for hybrid electronic invoices, combining PDF and XML to meet the requirements of
+both businesses and tax authorities across the EU.
+
+Learn more at: https://www.factur-x.org/
