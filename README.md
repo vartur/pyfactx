@@ -27,9 +27,7 @@ pip install pyfactx
 
 PyFactX aims for full compliance with the following:
 
-* Factur-X Minimum/Basic/EN16931 profiles
-* EN 16931 UBL/CII syntax rules
-* PEPPOL BIS Billing 3.0 compatibility
+* Factur-X **_MINIMUM_**, **_BASIC_WL_**, **_BASIC_** AND **_EN16931_** invoice profiles
 * Schematron validation support
 
 ## 🚀 Quick Start
