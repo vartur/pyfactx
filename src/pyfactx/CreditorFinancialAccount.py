@@ -23,7 +23,7 @@ class CreditorFinancialAccount(XMLBaseModel):
 
         if profile >= InvoiceProfile.EN16931:
             # AccountName
-            ET.SubElement(root, f"f{{{NAMESPACES[RAM]}}}AccountName").text = self.account_name
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}AccountName").text = self.account_name
 
         # ProprietaryID
         if self.proprietary_id:
