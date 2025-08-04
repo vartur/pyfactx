@@ -29,7 +29,7 @@ class TradeTax(XMLBaseModel):
         root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
 
         # CalculatedAmount
-        if self.calculated_amount:
+        if self.calculated_amount is not None:
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CalculatedAmount").text = str(self.calculated_amount)
 
         # TypeCode
@@ -40,7 +40,7 @@ class TradeTax(XMLBaseModel):
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ExemptionReason").text = self.exemption_reason
 
         # BasisAmount
-        if self.basis_amount:
+        if self.basis_amount is not None:
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}BasisAmount").text = str(self.basis_amount)
 
         # CategoryCode
@@ -62,7 +62,7 @@ class TradeTax(XMLBaseModel):
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}DueDateTypeCode").text = self.due_date_type_code.value
 
         # RateApplicablePercent
-        if self.rate_applicable_percent:
+        if self.rate_applicable_percent is not None:
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}RateApplicablePercent").text = str(self.rate_applicable_percent)
 
         return root
