@@ -40,7 +40,7 @@ class FacturXGenerator:
 
                 return len(failed_asserts) == 0 and len(reports) == 0
 
-            with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".xml") as xml_file:
+            with tempfile.NamedTemporaryFile("w+", encoding="utf-8", delete=False, suffix=".xml") as xml_file:
                 xml_str = ET.tostring(factur_x_xml, pretty_print=True, encoding="utf-8").decode('utf-8')
                 xml_file.write(xml_str)
                 xml_path = xml_file.name
