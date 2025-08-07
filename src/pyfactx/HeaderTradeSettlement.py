@@ -1,7 +1,7 @@
-from typing import Optional, override
+from typing import Optional, ClassVar, List
 from lxml import etree as ET
-
-from pydantic import Field
+from pydantic import Field, ConfigDict, model_validator
+from typing_extensions import override
 
 from .InvoiceProfile import InvoiceProfile
 from .ReferencedDocument import ReferencedDocument
@@ -18,81 +18,212 @@ from .namespaces import NAMESPACES, RAM
 
 
 class HeaderTradeSettlement(XMLBaseModel):
-    creditor_reference_id: Optional[str] = Field(default=None)
-    payment_reference: Optional[str] = Field(default=None)
-    tax_currency_code: Optional[str] = Field(default=None)
-    invoice_currency_code: str = Field(...)
-    payee_trade_party: Optional[TradeParty] = Field(default=None)
-    specified_trade_settlement_payment_means: Optional[list[TradeSettlementPaymentMeans]] = Field(default=None)
-    applicable_trade_tax: Optional[list[TradeTax]] = Field(default=None)
-    billing_specified_period: Optional[SpecifiedPeriod] = Field(default=None)
-    specified_trade_allowance_charge: Optional[list[TradeAllowanceCharge]] = Field(default=None)
-    specified_trade_payment_terms: Optional[TradePaymentTerms] = Field(default=None)
-    specified_trade_settlement_header_monetary_summation: TradeSettlementHeaderMonetarySummation = Field(...)
-    invoice_referenced_documents: Optional[list[ReferencedDocument]] = Field(default=None)
-    receivable_specified_trade_accounting_account: Optional[TradeAccountingAccount] = Field(default=None)
+    """Represents the trade settlement header section of a Factur-X document.
+
+    This class contains information about payment terms, currencies, taxes,
+    and monetary summations for the invoice.
+    """
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        validate_assignment=True
+    )
+
+    # XML element names mapping
+    XML_ELEMENTS: ClassVar[dict[str, str]] = {
+        'creditor_ref': 'CreditorReferenceID',
+        'payment_ref': 'PaymentReference',
+        'tax_currency': 'TaxCurrencyCode',
+        'invoice_currency': 'InvoiceCurrencyCode',
+        'payee': 'PayeeTradeParty',
+        'payment_means': 'SpecifiedTradeSettlementPaymentMeans',
+        'tax': 'ApplicableTradeTax',
+        'period': 'BillingSpecifiedPeriod',
+        'allowance': 'SpecifiedTradeAllowanceCharge',
+        'payment_terms': 'SpecifiedTradePaymentTerms',
+        'monetary_summation': 'SpecifiedTradeSettlementHeaderMonetarySummation',
+        'invoice_ref': 'InvoiceReferencedDocument',
+        'accounting': 'ReceivableSpecifiedTradeAccountingAccount'
+    }
+
+    # Required fields
+    invoice_currency_code: str = Field(
+        ...,
+        description="Currency code for the invoice (e.g., 'EUR', 'USD')"
+    )
+    
+    specified_trade_settlement_header_monetary_summation: TradeSettlementHeaderMonetarySummation = Field(
+        ...,
+        description="Monetary totals for the invoice"
+    )
+
+    # Optional fields (BASICWL and above)
+    creditor_reference_id: Optional[str] = Field(
+        default=None,
+        description="Creditor's reference identifier (BASICWL+)"
+    )
+    
+    payment_reference: Optional[str] = Field(
+        default=None,
+        description="Payment reference number (BASICWL+)"
+    )
+    
+    tax_currency_code: Optional[str] = Field(
+        default=None,
+        description="Currency code for tax amounts (BASICWL+)"
+    )
+    
+    payee_trade_party: Optional[TradeParty] = Field(
+        default=None,
+        description="Party to receive the payment (BASICWL+)"
+    )
+    
+    specified_trade_settlement_payment_means: Optional[List[TradeSettlementPaymentMeans]] = Field(
+        default=None,
+        description="Payment means details (BASICWL+)"
+    )
+    
+    applicable_trade_tax: Optional[List[TradeTax]] = Field(
+        default=None,
+        description="Tax details (BASICWL+)"
+    )
+    
+    billing_specified_period: Optional[SpecifiedPeriod] = Field(
+        default=None,
+        description="Billing period details (BASICWL+)"
+    )
+    
+    specified_trade_allowance_charge: Optional[List[TradeAllowanceCharge]] = Field(
+        default=None,
+        description="Allowances and charges (BASICWL+)"
+    )
+    
+    specified_trade_payment_terms: Optional[TradePaymentTerms] = Field(
+        default=None,
+        description="Payment terms (BASICWL+)"
+    )
+    
+    invoice_referenced_documents: Optional[List[ReferencedDocument]] = Field(
+        default=None,
+        description="Referenced invoice documents (BASICWL+)"
+    )
+    
+    receivable_specified_trade_accounting_account: Optional[TradeAccountingAccount] = Field(
+        default=None,
+        description="Accounting account details (BASICWL+)"
+    )
+
+    @model_validator(mode='after')
+    def validate_profile_specific_fields(self) -> 'HeaderTradeSettlement':
+        """Validates that fields are appropriate for their profile level."""
+        profile = getattr(self, '_current_profile', None)
+        if not profile:
+            return self
+
+        if profile < InvoiceProfile.BASICWL:
+            basicwl_fields = [
+                ('creditor_reference_id', self.creditor_reference_id),
+                ('payment_reference', self.payment_reference),
+                ('tax_currency_code', self.tax_currency_code),
+                ('payee_trade_party', self.payee_trade_party),
+                ('specified_trade_settlement_payment_means', self.specified_trade_settlement_payment_means),
+                ('applicable_trade_tax', self.applicable_trade_tax),
+                ('billing_specified_period', self.billing_specified_period),
+                ('specified_trade_allowance_charge', self.specified_trade_allowance_charge),
+                ('specified_trade_payment_terms', self.specified_trade_payment_terms),
+                ('invoice_referenced_documents', self.invoice_referenced_documents),
+                ('receivable_specified_trade_accounting_account', self.receivable_specified_trade_accounting_account)
+            ]
+
+            for field_name, field_value in basicwl_fields:
+                if field_value is not None:
+                    raise ValueError(
+                        f"{field_name} is only allowed in BASICWL profile and above"
+                    )
+
+        return self
+
+    def _add_text_element(
+        self,
+        root: ET.Element,
+        value: Optional[str],
+        element_name: str,
+        profile: InvoiceProfile,
+        min_profile: InvoiceProfile
+    ) -> None:
+        """Adds a text element to the XML if conditions are met."""
+        if value is not None and profile >= min_profile:
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}{element_name}").text = value
+
+    def _add_object_element(
+        self,
+        root: ET.Element,
+        obj: Optional[XMLBaseModel],
+        element_name: str,
+        profile: InvoiceProfile,
+        min_profile: InvoiceProfile
+    ) -> None:
+        """Adds an object element to the XML if conditions are met."""
+        if obj is not None and profile >= min_profile:
+            root.append(obj.to_xml(element_name, profile))
+
+    def _add_list_elements(
+        self,
+        root: ET.Element,
+        items: Optional[List[XMLBaseModel]],
+        element_name: str,
+        profile: InvoiceProfile,
+        min_profile: InvoiceProfile
+    ) -> None:
+        """Adds list elements to the XML if conditions are met."""
+        if items is not None and profile >= min_profile:
+            for item in items:
+                root.append(item.to_xml(element_name, profile))
 
     @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
+        """Converts the trade settlement to XML format."""
         root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")
+        
+        # Set profile for validation
+        self._current_profile = profile
 
-        if profile >= InvoiceProfile.BASICWL:
-            # CreditorReferenceID
-            if self.creditor_reference_id:
-                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}CreditorReferenceID").text = self.creditor_reference_id
+        # Add BASICWL+ text elements
+        self._add_text_element(root, self.creditor_reference_id, self.XML_ELEMENTS['creditor_ref'], 
+                             profile, InvoiceProfile.BASICWL)
+        self._add_text_element(root, self.payment_reference, self.XML_ELEMENTS['payment_ref'],
+                             profile, InvoiceProfile.BASICWL)
+        self._add_text_element(root, self.tax_currency_code, self.XML_ELEMENTS['tax_currency'],
+                             profile, InvoiceProfile.BASICWL)
 
-            # PaymentReference
-            if self.payment_reference:
-                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}PaymentReference").text = self.payment_reference
+        # Add required elements
+        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}{self.XML_ELEMENTS['invoice_currency']}").text = \
+            self.invoice_currency_code
 
-            # TaxCurrencyCode
-            if self.tax_currency_code:
-                ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}TaxCurrencyCode").text = self.tax_currency_code
+        # Add BASICWL+ object elements
+        self._add_object_element(root, self.payee_trade_party, self.XML_ELEMENTS['payee'],
+                               profile, InvoiceProfile.BASICWL)
+        self._add_object_element(root, self.billing_specified_period, self.XML_ELEMENTS['period'],
+                               profile, InvoiceProfile.BASICWL)
+        self._add_object_element(root, self.specified_trade_payment_terms, self.XML_ELEMENTS['payment_terms'],
+                               profile, InvoiceProfile.BASICWL)
 
-        # InvoiceCurrencyCode
-        ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}InvoiceCurrencyCode").text = self.invoice_currency_code
+        # Add BASICWL+ list elements
+        self._add_list_elements(root, self.specified_trade_settlement_payment_means, 
+                              self.XML_ELEMENTS['payment_means'], profile, InvoiceProfile.BASICWL)
+        self._add_list_elements(root, self.applicable_trade_tax, self.XML_ELEMENTS['tax'],
+                              profile, InvoiceProfile.BASICWL)
+        self._add_list_elements(root, self.specified_trade_allowance_charge, self.XML_ELEMENTS['allowance'],
+                              profile, InvoiceProfile.BASICWL)
+        self._add_list_elements(root, self.invoice_referenced_documents, self.XML_ELEMENTS['invoice_ref'],
+                              profile, InvoiceProfile.BASICWL)
 
-        if profile >= InvoiceProfile.BASICWL:
-            # PayeeTradeParty
-            if self.payee_trade_party:
-                root.append(self.payee_trade_party.to_xml("PayeeTradeParty", profile))
-
-            # SpecifiedTradeSettlementPaymentMeans
-            if self.specified_trade_settlement_payment_means:
-                for payment_means in self.specified_trade_settlement_payment_means:
-                    root.append(payment_means.to_xml("SpecifiedTradeSettlementPaymentMeans", profile))
-
-            # ApplicableTradeTax
-            if self.applicable_trade_tax:
-                for trade_tax in self.applicable_trade_tax:
-                    root.append(trade_tax.to_xml("ApplicableTradeTax", profile))
-
-            # BillingSpecifiedPeriod
-            if self.billing_specified_period:
-                root.append(self.billing_specified_period.to_xml("BillingSpecifiedPeriod", profile))
-
-            # SpecifiedTradeAllowanceCharge
-            if self.specified_trade_allowance_charge:
-                for trade_allowance_charge in self.specified_trade_allowance_charge:
-                    root.append(trade_allowance_charge.to_xml("SpecifiedTradeAllowanceCharge", profile))
-
-            # SpecifiedTradePaymentTerms
-            if self.specified_trade_payment_terms:
-                root.append(self.specified_trade_payment_terms.to_xml("SpecifiedTradePaymentTerms", profile))
-
-        # SpecifiedTradeSettlementHeaderMonetarySummation
+        # Add required monetary summation
         root.append(self.specified_trade_settlement_header_monetary_summation.to_xml(
-            "SpecifiedTradeSettlementHeaderMonetarySummation", profile))
+            self.XML_ELEMENTS['monetary_summation'], profile))
 
-        if profile >= InvoiceProfile.BASICWL:
-            # InvoiceReferencedDocument
-            if self.invoice_referenced_documents:
-                for ref_doc in self.invoice_referenced_documents:
-                    root.append(ref_doc.to_xml("InvoiceReferencedDocument", profile))
-
-            # ReceivableSpecifiedTradeAccountingAccount
-            if self.receivable_specified_trade_accounting_account:
-                root.append(self.receivable_specified_trade_accounting_account.to_xml(
-                    "ReceivableSpecifiedTradeAccountingAccount", profile))
+        # Add optional accounting account
+        self._add_object_element(root, self.receivable_specified_trade_accounting_account,
+                               self.XML_ELEMENTS['accounting'], profile, InvoiceProfile.BASICWL)
 
         return root

@@ -24,6 +24,7 @@ class TradeTax(XMLBaseModel):
     due_date_type_code: Optional[TimeReferenceCode] = Field(default=None)
     rate_applicable_percent: Optional[float] = Field(default=None)
 
+
     @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
         root = ET.Element(f"{{{NAMESPACES[RAM]}}}{element_name}")

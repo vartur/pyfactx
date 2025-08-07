@@ -2,6 +2,7 @@ import datetime
 from lxml import etree as ET
 
 from src.pyfactx.BinaryObject import BinaryObject
+from src.pyfactx.CreditorFinancialAccount import CreditorFinancialAccount
 from src.pyfactx.DocumentLineDocument import DocumentLineDocument
 from src.pyfactx.DocumentTypeCode import DocumentTypeCode
 from src.pyfactx.ExchangedDocument import ExchangedDocument
@@ -41,7 +42,7 @@ from src.pyfactx.UniversalCommunication import UniversalCommunication
 
 doc_context = ExchangedDocumentContext(business_process_specified_document_context_parameter="MyBusiness",
                                        guideline_specified_document_context_parameter=InvoiceProfile.EN16931)
-document = ExchangedDocument(id="INV-ABCDEF",
+document = ExchangedDocument(id="2025-008",
                              type_code=InvoiceTypeCode.COMMERCIAL_INVOICE,
                              issue_date_time=datetime.datetime(year=2025, month=4, day=25),
                              included_notes=[Note(content="Sausages", subject_code="AAA"),
@@ -50,7 +51,7 @@ document = ExchangedDocument(id="INV-ABCDEF",
 trade_address = TradeAddress(postcode="75001", line_one="1 rue des Baguettes", line_two="4è étage",
                              line_three="Appartement 48", city="Paris", country="FR",
                              country_subdivision="Île de France")
-legal_org = LegalOrganization(id="123456789", trading_business_name="Saucisses & Co")
+legal_org = LegalOrganization(id="529900XYZSPDX6QIVV84", trading_business_name="Saucisses and Co")
 trade_contact = TradeContact(person_name="John Contact", department_name="Macro Data Refinement",
                              telephone_universal_communication=UniversalCommunication(complete_number="01 23 45 67 89"),
                              email_uri_universal_communication=UniversalCommunication(uri_id="john@macrodata.com"))
@@ -87,18 +88,22 @@ monetary_summation = TradeSettlementHeaderMonetarySummation(tax_basis_total_amou
 applicable_trade_tax = TradeTax(calculated_amount=4.90, type_code=TaxTypeCode.VALUE_ADDED_TAX, basis_amount=100.0,
                                 category_code=TaxCategoryCode.STANDARD_RATE, rate_applicable_percent=4.90)
 payment_means = [TradeSettlementPaymentMeans(payment_means_code=PaymentMeansCode.CASH),
-                 TradeSettlementPaymentMeans(payment_means_code=PaymentMeansCode.SEPA_CREDIT_TRANSFER)]
+                 TradeSettlementPaymentMeans(payment_means_code=PaymentMeansCode.SEPA_CREDIT_TRANSFER,
+                                             payee_party_creditor_financial_account=CreditorFinancialAccount(
+                                                 proprietary_id="1"))]
 
 ref_doc = ReferencedDocument(issuer_assigned_id="123", uri_id="urn:abc:def", line_id="1",
                              type_code=DocumentTypeCode.RELATED_DOCUMENT, name="Example",
-                             attachment_binary_object=BinaryObject(content_b64="1561561561561", mime_code="image/jpeg",
+                             attachment_binary_object=BinaryObject(content_b64="SGVsbG8gV29ybGQ=",
+                                                                   mime_code="image/jpeg",
                                                                    filename="cat.jpeg"), reference_type_code="123",
                              issue_date=datetime.datetime(year=2025, month=3, day=1))
 
 ref_doc2 = ReferencedDocument(issuer_assigned_id="123")
 ref_doc3 = ReferencedDocument(issuer_assigned_id="123", uri_id="urn:abc:def",
                               type_code=DocumentTypeCode.RELATED_DOCUMENT, name="Example",
-                              attachment_binary_object=BinaryObject(content_b64="1561561561561", mime_code="image/jpeg",
+                              attachment_binary_object=BinaryObject(content_b64="SGVsbG8gV29ybGQ=",
+                                                                    mime_code="image/jpeg",
                                                                     filename="cat.jpeg"))
 trade_agreement = HeaderTradeAgreement(seller_trade_party=seller, buyer_trade_party=buyer,
                                        seller_tax_representative_trade_party=tax_rep,
