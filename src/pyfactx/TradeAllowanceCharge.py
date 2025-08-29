@@ -154,7 +154,7 @@ class TradeAllowanceCharge(XMLBaseModel):
 
         # ReasonCode
         if self.reason_code:
-            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ReasonCode").text = self.reason_code.value
+            ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}ReasonCode").text = str(self.reason_code.value)
 
         # Reason
         if self.reason:
