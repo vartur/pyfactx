@@ -1,7 +1,6 @@
 from typing import Optional
-from decimal import Decimal
-from lxml import etree as ET
 
+from lxml import etree as ET
 from pydantic import Field, field_validator
 from typing_extensions import override
 
@@ -61,8 +60,8 @@ class TradeAllowanceCharge(XMLBaseModel):
         description="Textual description of the reason",
         max_length=512
     )
-    category_trade_tax: TradeTax = Field(
-        ...,
+    category_trade_tax: Optional[TradeTax] = Field(
+        default = None,
         description="Tax category applying to this allowance or charge"
     )
 
@@ -106,7 +105,10 @@ class TradeAllowanceCharge(XMLBaseModel):
         Returns:
             float: The calculated tax amount
         """
-        return round(self.actual_amount * (self.category_trade_tax.rate_applicable_percent / 100), 2)
+        if self.category_trade_tax is None:
+            return 0.0
+        else:
+            return round(self.actual_amount * (self.category_trade_tax.rate_applicable_percent / 100), 2)
 
     @override
     def to_xml(self, element_name: str, profile: InvoiceProfile) -> ET.Element:
@@ -161,7 +163,8 @@ class TradeAllowanceCharge(XMLBaseModel):
             ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}Reason").text = self.reason
 
         # CategoryTradeTax
-        root.append(self.category_trade_tax.to_xml("CategoryTradeTax", profile))
+        if self.category_trade_tax:
+            root.append(self.category_trade_tax.to_xml("CategoryTradeTax", profile))
 
         return root
 
