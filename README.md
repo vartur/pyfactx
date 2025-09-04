@@ -1,3 +1,5 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
 # PyFactX
 
 **PyFactX** is a Python library that leverages [Pydantic](https://docs.pydantic.dev/) models to generate fully
