@@ -200,19 +200,18 @@ class HeaderTradeSettlement(XMLBaseModel):
         ET.SubElement(root, f"{{{NAMESPACES[RAM]}}}{self.XML_ELEMENTS['invoice_currency']}").text = \
             self.invoice_currency_code
 
-        # Add BASICWL+ object elements
         self._add_object_element(root, self.payee_trade_party, self.XML_ELEMENTS['payee'],
                                profile, InvoiceProfile.BASICWL)
         self._add_object_element(root, self.billing_specified_period, self.XML_ELEMENTS['period'],
                                profile, InvoiceProfile.BASICWL)
-        self._add_object_element(root, self.specified_trade_payment_terms, self.XML_ELEMENTS['payment_terms'],
-                               profile, InvoiceProfile.BASICWL)
 
-        # Add BASICWL+ list elements
+
         self._add_list_elements(root, self.specified_trade_settlement_payment_means, 
                               self.XML_ELEMENTS['payment_means'], profile, InvoiceProfile.BASICWL)
         self._add_list_elements(root, self.applicable_trade_tax, self.XML_ELEMENTS['tax'],
                               profile, InvoiceProfile.BASICWL)
+        self._add_object_element(root, self.specified_trade_payment_terms, self.XML_ELEMENTS['payment_terms'],
+                                 profile, InvoiceProfile.BASICWL)
         self._add_list_elements(root, self.specified_trade_allowance_charge, self.XML_ELEMENTS['allowance'],
                               profile, InvoiceProfile.BASICWL)
         self._add_list_elements(root, self.invoice_referenced_documents, self.XML_ELEMENTS['invoice_ref'],
